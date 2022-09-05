@@ -3,7 +3,7 @@
 enabled: true
 aws_id: placeholder_base64
 aws_key: placeholder_base64
-create_secret_in_chart: none
+create_secret_in_chart: none # or "regular" for plane secret or "sealed" for bitnami sealed secrets
 registry_server: awsid.dkr.ecr.awsregion.amazonaws.com
 registry_email: myemail@mytest.me
 secret_name: regcred
