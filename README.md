@@ -2,7 +2,7 @@
 
 1. ecr-regcred
 
-This chart is built to be used as a dependency which creates a regcred secret for AWS ECR.
+This chart is built to be used stand-alone or as a dependency which creates a regcred secret for AWS ECR.
 
 When working with ECR, AWS IAM API ID and Key are used to obtain a token which in turn is used to authenticate to the ECR registry. However, the token itself is valid for only 12 hours. That becomes problematic for CD process on Kubernetes. This chart automatically resolves the registry token based on IAM credentials an does so on startup and then refreshes every 11 hours.
 
