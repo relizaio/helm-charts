@@ -1,0 +1,157 @@
+{{- if .Values.enabled}}
+{{- if eq .Values.create_secret_in_chart "regular"}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: reliza-ecr-regcred
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+type: Opaque
+data:
+  AWS_ACCESS_KEY_ID: {{ .Values.aws_id | quote }}
+  AWS_SECRET_ACCESS_KEY: {{ .Values.aws_key | quote }}
+---
+{{- else if eq .Values.create_secret_in_chart "sealed"}}
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: reliza-ecr-regcred
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+  {{- if eq .Values.sealed_secrets_scope "namespace-wide"}}
+  annotations:
+    sealedsecrets.bitnami.com/namespace-wide: "true"
+  {{- else if eq .Values.sealed_secrets_scope "cluster-wide"}}
+  annotations:
+    sealedsecrets.bitnami.com/cluster-wide: "true"
+  {{- end }}
+spec:
+  encryptedData:
+    AWS_ACCESS_KEY_ID: {{ .Values.aws_id | quote }}
+    AWS_SECRET_ACCESS_KEY: {{ .Values.aws_key | quote }}
+---
+{{- end}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reliza-ecr-regcred
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+data:
+  NAMESPACE_TO_DEPLOY: {{ .Values.namespace_override | default .Release.Namespace }}
+  REGISTRY_SERVER: {{ .Values.registry_server | quote }}
+  EMAIL: {{ .Values.registry_email | quote }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: reliza-ecr-regcred-sa
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: reliza-ecr-regcred
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["{{ .Values.secret_name }}"]
+  verbs: ["get", "create", "update", "patch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: reliza-ecr-regcred
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: reliza-ecr-regcred-sa
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: reliza-ecr-regcred
+  apiGroup: ""
+---
+# job for the first run
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: reliza-ecr-regcred-init
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      serviceAccount: reliza-ecr-regcred-sa
+      initContainers:
+      - name: aws-ecr-auth
+        image: amazon/aws-cli
+        command: ['/bin/bash', '-c', '/usr/local/bin/aws ecr get-login-password --region us-east-1 > /apps/work-values/aws']
+        envFrom:
+        - secretRef:
+            name: reliza-ecr-regcred
+        volumeMounts:
+        - mountPath: "/apps/work-values"
+          name: shared-data
+      containers:
+      - command: ['/bin/sh', '-c', 'export DOCKER_PASS=$(cat /apps/work-values/aws); kubectl create secret docker-registry regcred --docker-server=$REGISTRY_SERVER --docker-username=AWS --docker-password=$DOCKER_PASS --docker-email=$EMAIL -n $NAMESPACE_TO_DEPLOY --dry-run=client -o yaml | kubectl apply -f -']
+        image: {{ .Values.kubectl.image }}
+        name: kubectl
+        resources: {}
+        envFrom:
+        - configMapRef:
+            name: reliza-ecr-regcred
+        volumeMounts:
+        - mountPath: "/apps/work-values"
+          name: shared-data
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+---
+# cj for subsequent runs
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reliza-ecr-regcred
+  namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+  labels:
+    run: reliza-ecr-regcred
+spec:
+  schedule: "* */11 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 4
+      template:
+        spec:
+          serviceAccount: reliza-ecr-regcred-sa
+          initContainers:
+          - name: aws-ecr-auth
+            image: amazon/aws-cli
+            command: ['/bin/bash', '-c', '/usr/local/bin/aws ecr get-login-password --region us-east-1 > /apps/work-values/aws']
+            envFrom:
+            - secretRef:
+                name: reliza-ecr-regcred
+            volumeMounts:
+            - mountPath: "/apps/work-values"
+              name: shared-data
+          containers:
+          - command: ['/bin/sh', '-c', 'export DOCKER_PASS=$(cat /apps/work-values/aws); kubectl create secret docker-registry regcred --docker-server=$REGISTRY_SERVER --docker-username=AWS --docker-password=$DOCKER_PASS --docker-email=$EMAIL -n $NAMESPACE_TO_DEPLOY --dry-run=client -o yaml | kubectl apply -f -']
+            image: {{ .Values.kubectl.image }}
+            name: kubectl
+            resources: {}
+            envFrom:
+            - configMapRef:
+                name: reliza-ecr-regcred
+            volumeMounts:
+            - mountPath: "/apps/work-values"
+              name: shared-data
+          volumes:
+            - name: shared-data
+              emptyDir: {}
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+{{- end}}

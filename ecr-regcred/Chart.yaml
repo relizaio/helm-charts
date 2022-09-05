@@ -1,0 +1,9 @@
+apiVersion: v2
+name: ecr-regcred
+description: Helm Chart to enable regcred secret for AWS ECR
+
+type: application
+
+version: 0.1.0
+
+appVersion: 0.1.0
