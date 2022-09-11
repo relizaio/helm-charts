@@ -32,4 +32,4 @@ dependencies:
 
 After that run `helm dependency update`
 
-Then use same properties as above to configure but under `ecr-regcred` umbrella yaml key.
+Then use same properties as above to configure but under `ecr-regcred` umbrella yaml key. Refer to values.yaml in this chart for full list of settings.
