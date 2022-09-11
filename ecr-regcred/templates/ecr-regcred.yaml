@@ -7,8 +7,8 @@ metadata:
   namespace: {{ .Values.namespace_override | default .Release.Namespace }}
 type: Opaque
 data:
-  AWS_ACCESS_KEY_ID: {{ .Values.aws_id | quote }}
-  AWS_SECRET_ACCESS_KEY: {{ .Values.aws_key | quote }}
+  AWS_ACCESS_KEY_ID: {{ .Values.aws_id | b64enc | quote }}
+  AWS_SECRET_ACCESS_KEY: {{ .Values.aws_key | b64enc | quote }}
 ---
 {{- else if eq .Values.create_secret_in_chart "sealed"}}
 apiVersion: bitnami.com/v1alpha1
