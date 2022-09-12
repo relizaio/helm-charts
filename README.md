@@ -1,6 +1,6 @@
 # This repository contains a set of public helm charts by Reliza
 
-1. ecr-regcred
+## 1. ECR-Regcred
 
 This chart is built to be used stand-alone or as a dependency which creates a regcred secret for AWS ECR.
 
