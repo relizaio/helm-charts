@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "reliza-watcher.fullname" . }}-deployment
+  labels:
+    app.kubernetes.io/name: {{ include "reliza-watcher.fullname" . }}-deployment  
+    {{- include "reliza-watcher.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "reliza-watcher.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      {{- end }}
+      labels:
+        {{- include "reliza-watcher.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "reliza-watcher.fullname" . }}-sa
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.repository }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: HUB_URI
+            value: {{ .Values.hubURI }}
+          - name: NAMESPACE
+            value: {{ .Values.namespace }}
+          - name: SENDER_ID
+            value: {{.Values.sender}}
+          - name: RELIZA_API_ID
+            valueFrom:
+              secretKeyRef:
+                name: reliza-watcher-api-key
+                key: reliza-api-id
+          - name: RELIZA_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: reliza-watcher-api-key
+                key: reliza-api-key

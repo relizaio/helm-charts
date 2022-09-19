@@ -1,0 +1,67 @@
+{{- if eq .Values.namespace "allnamespaces" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "reliza-watcher.fullname" . }}-{{ .Release.Namespace }}
+  name: {{ include "reliza-watcher.fullname" . }}-{{ .Release.Namespace }}
+rules:
+- apiGroups: ["*"]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "watch", "list"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "reliza-watcher.fullname" . }}-{{ .Release.Namespace }}
+    app.kubernetes.io/part-of: {{ include "reliza-watcher.fullname" . }}
+  name: {{ include "reliza-watcher.fullname" . }}-{{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "reliza-watcher.fullname" . }}-{{ .Release.Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "reliza-watcher.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+
+{{- else }}
+  {{- range $index, $ns := (split "," $.Values.namespace) }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ $.Release.Name }}-{{ $.Release.Namespace }}
+  name: {{ $.Release.Name }}-{{ $.Release.Namespace }}
+  namespace: {{ $ns }}
+rules:
+- apiGroups: ["*"]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "watch", "list"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ $.Release.Name }}-{{ $.Release.Namespace }}
+    app.kubernetes.io/part-of: {{ $.Release.Name }}
+  name: {{ $.Release.Name }}-{{ $.Release.Namespace }}
+  namespace: {{ $ns }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $.Release.Name }}-{{ $.Release.Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+
+---
+
+  {{- end }}
+{{- end }}

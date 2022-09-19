@@ -1,0 +1,20 @@
+# Default values for reliza-watcher.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: relizaio/reliza-watcher
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+
+namespace: allnamespaces
+sender: default
+
+hubURI: https://app.relizahub.com
