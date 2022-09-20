@@ -15,19 +15,17 @@ spec:
     type: Recreate
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      {{- end }}
       labels:
         {{- include "reliza-watcher.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "reliza-watcher.fullname" . }}-sa
+      serviceAccountName: {{ $.Release.Name }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: HUB_URI
-            value: {{ .Values.hubURI }}
+            value: {{ .Values.hubUri }}
           - name: NAMESPACE
             value: {{ .Values.namespace }}
           - name: SENDER_ID
@@ -35,10 +33,10 @@ spec:
           - name: RELIZA_API_ID
             valueFrom:
               secretKeyRef:
-                name: reliza-watcher-api-key
+                name: reliza-watcher
                 key: reliza-api-id
           - name: RELIZA_API_KEY
             valueFrom:
               secretKeyRef:
-                name: reliza-watcher-api-key
+                name: reliza-watcher
                 key: reliza-api-key

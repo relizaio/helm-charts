@@ -11,10 +11,14 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
-serviceAccount:
-  create: true
+createServiceAccount: true
 
 namespace: allnamespaces
 sender: default
 
-hubURI: https://app.relizahub.com
+hubUri: https://app.relizahub.com
+
+create_secret_in_chart: none # or "regular" for plane secret or "sealed" for bitnami sealed secrets
+relizaApiId: placeholder
+relizaApiKey: placeholder
+sealed_secrets_scope: namespace-wide # other possible values: strict, cluster-wide, see https://github.com/bitnami-labs/sealed-secrets#scopes
