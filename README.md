@@ -67,7 +67,7 @@ helm install reliza-watcher -n reliza-watcher --set namespace="default\,myappnam
 
 2. Sender id can be set to any string via *sender* property. Data from different senders will be combined on the Reliza Hub in the instance view.
 
-## Install Using Helm In A Multi-Namespace Kubernetes Clusters
+### Install Using Helm In A Multi-Namespace Kubernetes Clusters
 
 When you wish to watch different instances deployed in different namespaces of a kubernetes cluster, multiple instances of reliza-watcher are required and can be deployed as follows:
 
@@ -86,3 +86,40 @@ helm install reliza-watcher -n <ns-B> --set namespace="ns-B" reliza/reliza-watch
 ```
 
 Note that this last example also shows reliza-watcher secret created outside of the helm chart.
+
+### Use Reliza Watcher as a Dependency
+
+Note that this approach is convenient for testing, but we do not recommend it for major persistent environments, especially for Production. That is because it binds watcher to the application helm chart, so if such chart is getting undeployed, the Watcher is also getting undeployed - and observability is lost.
+
+To add Reliza Watcher to your chart as a dependency:
+
+Add this chart to dependencies section of your Chart.yaml as following:
+
+```
+dependencies:
+  - name: reliza-watcher
+    repository: "https://registry.relizahub.com/chartrepo/library"
+    version: ">=0.0.0"
+```
+
+After that run `helm dependency update`
+
+Then use same properties as above to configure but under `reliza-watcher` umbrella yaml key. Refer to values.yaml in this chart for full list of settings.
+
+Sample:
+
+```
+reliza-watcher:
+  enabled: true
+  namespace: relizahub
+  create_secret_in_chart: regular
+  relizaApiId: placeholder_id
+  relizaApiKey: placeholder_key
+```
+
+Also we recommend to initialize it as disabled in root values.yaml, and then customize per environments, like the following:
+
+```
+reliza-watcher:
+  enabled: true
+```
