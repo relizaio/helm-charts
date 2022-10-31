@@ -120,7 +120,7 @@ metadata:
   labels:
     run: reliza-ecr-regcred
 spec:
-  schedule: "* */11 * * *"
+  schedule: "1 */11 * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
