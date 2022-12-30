@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-reliza-cd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: reliza-cd
+spec:
+  replicas: 1
+  serviceName: "reliza-cd"
+  selector:
+    matchLabels:
+      name: {{ .Release.Name }}-loop
+      app: reliza-cd
+  template:
+    metadata:
+      labels:
+        name: {{ .Release.Name }}-loop
+        app: reliza-cd
+    spec:
+      serviceAccount: {{ .Release.Namespace }}-{{ .Release.Name }}-reliza-cd
+      containers:
+        - name: {{ .Chart.Name }}-reliza-cd
+          image: "{{ .Values.images.relizacdImage }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env:
+          - name: MY_NAMESPACE
+            value: {{ .Release.Namespace }}
+          envFrom:
+          - secretRef:
+              name: reliza-cd
+          volumeMounts:
+          - mountPath: "/app/workspace"
+            name: reliza-cd-workspace
+  volumeClaimTemplates:
+    - metadata:
+        name: reliza-cd-workspace
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ $.Values.storageSize }}

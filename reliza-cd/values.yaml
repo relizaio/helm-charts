@@ -1,0 +1,15 @@
+# Default values for reliza-cd.
+# This is a YAML-formatted file.
+
+mode: STANDALONE # options: STANDALONE (ARGO mode to be added later)
+hubUri: https://app.relizahub.com
+imagePullPolicy: IfNotPresent
+images:
+  relizacdImage: docker.io/relizaio/reliza-cd:22.12.12
+
+storageSize: 1G
+
+createSecretInChart: none # regular, none
+relizaHubUri: https://app.relizahub.com
+rhApiKeyId: placeholder # instance api id
+rhApiKey: placeholder # instance api key
