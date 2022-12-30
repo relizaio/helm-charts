@@ -156,7 +156,7 @@ jobs:
           echo "Artifact is already part of another release, not duplicating"
         fi
     - name: Build and submit release for Reliza CD
-      uses: relizaio/reliza-helm-action@1.2
+      uses: relizaio/reliza-helm-action@master
       with:
         repository_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
         repository_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
