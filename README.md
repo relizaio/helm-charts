@@ -76,7 +76,7 @@ Assume you have two instances *instance-A* and *instance-B* on [Reliza Hub](http
 1. Obtain Instance API ID and API Key for the instances *instance-A* and *instance-B* from [Reliza Hub](https://relizahub.com).
 2. Issue following commands replacing <RELIZA_API_ID_FOR_INSTANCE_A> and <RELIZA_API_KEY_INSTANCE_A> with values obtained from Reliza Hub:
 ```
-kubectl create secret generic reliza-watcher-n <ns-A> --from-literal=reliza-api-id=<RELIZA_API_ID_FOR_INSTANCE_A> --from-literal=reliza-api-key=<RELIZA_API_KEY_INSTANCE_A>
+kubectl create secret generic reliza-watcher -n <ns-A> --from-literal=reliza-api-id=<RELIZA_API_ID_FOR_INSTANCE_A> --from-literal=reliza-api-key=<RELIZA_API_KEY_INSTANCE_A>
 helm install reliza-watcher -n <ns-A> --set namespace="ns-A" reliza/reliza-watcher
 ```
 3. Issue following commands replacing <RELIZA_API_ID_FOR_INSTANCE_B> and <RELIZA_API_KEY_INSTANCE_B> with values obtained from Reliza Hub:
