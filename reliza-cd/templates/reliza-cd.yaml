@@ -26,6 +26,10 @@ spec:
           env:
           - name: MY_NAMESPACE
             value: {{ .Release.Namespace }}
+          - name: ENABLE_WATCHER
+            value: {{ .Values.enableWatcher | quote }}
+          - name: WATCHER_IMAGE
+            value: {{ .Values.images.watcherImage | quote }}
           envFrom:
           - secretRef:
               name: reliza-cd
