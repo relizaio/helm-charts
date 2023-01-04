@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build-ecr-regcred:
-    name: Build And Push Helm Chart
+    name: Build ECR REGCRED
     runs-on: ubuntu-latest
     env:
       HELM_CHART_NAME: ecr-regcred
@@ -23,7 +23,7 @@ jobs:
           registry_type: CHARTMEUSEUM
           
   build-reliza-cd:
-    name: Build And Push Helm Chart
+    name: Build RELIZA CD
     runs-on: ubuntu-latest
     env:
       HELM_CHART_NAME: reliza-cd
@@ -42,7 +42,7 @@ jobs:
           registry_type: CHARTMEUSEUM
 
   build-reliza-watcher:
-    name: Build And Push Helm Chart
+    name: Build RELIZA WATCHER
     runs-on: ubuntu-latest
     env:
       HELM_CHART_NAME: reliza-watcher
