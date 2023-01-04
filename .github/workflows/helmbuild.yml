@@ -3,225 +3,59 @@ name: Push Helm Charts on Change
 on: [push]
 
 jobs:
-
-  build:
-
+  build-ecr-regcred:
+    name: Build And Push Helm Chart
     runs-on: ubuntu-latest
-
+    env:
+      HELM_CHART_NAME: ecr-regcred
+      DIR: ecr-regcred
     steps:
-    - name: checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 100
-    - name: Pull Reliza CLI
-      run: docker pull relizaio/reliza-cli
-    - name: Build and submit release for ecr-regcred
-      run: |
-        dir=ecr-regcred
-        dobuild=false
-        last_commit=$(docker run --rm relizaio/reliza-cli getlatestrelease -i ${{ secrets.RELIZA_ECR_REGCRED_API_ID }} -k ${{ secrets.RELIZA_ECR_REGCRED_API_KEY }} --branch $GITHUB_REF | jq -r ".sourceCodeEntryDetails.commit")
-        if [ ! -z "$last_commit" ]
-        then
-          echo -n "--commits $(git log $last_commit..$GITHUB_SHA --date=iso-strict --pretty='%H|||%ad|||%s' -- $dir | base64 -w 0) " > commit_list
-          difflines=$(git diff $last_commit..$GITHUB_SHA $dir | wc -l)
-          if [ "$difflines" != "0" ]
-          then
-            dobuild=true
-          fi
-        else
-          dobuild=true
-        fi
-        if [ "$dobuild" == "true" ]
-        then
-          cd $dir
-          # obtain version
-          docker run --rm relizaio/reliza-cli getversion \
-            -i ${{ secrets.RELIZA_ECR_REGCRED_API_ID }} -k ${{ secrets.RELIZA_ECR_REGCRED_API_KEY }} -b $GITHUB_REF \
-            --commit $GITHUB_SHA --commitmessage \"$(git log -1 --pretty='%s')\ $(cat commit_list) > full_version_output 2>&1
-          echo "Version response:"
-          cat full_version_output
-          # now construct actual version variable
-          vvar=$(cat full_version_output | jq -r ".version")
+      - name: RelizaHub Build And Submit Release metadata action
+        uses: relizaio/reliza-helm-action@1.3
+        with:
+          registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
+          registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
+          registry_host: ${{ secrets.HELM_CHART_REPO }}
+          helm_chart_name: $HELM_CHART_NAME
+          reliza_api_id: ${{ secrets.RELIZA_ECR_REGCRED_API_ID }}
+          reliza_api_key: ${{ secrets.RELIZA_ECR_REGCRED_API_KEY }}
+          path: $DIR
+          registry_type: CHARTMEUSEUM
+          
+  build-reliza-cd:
+    name: Build And Push Helm Chart
+    runs-on: ubuntu-latest
+    env:
+      HELM_CHART_NAME: reliza-cd
+      DIR: reliza-cd
+    steps:
+      - name: RelizaHub Build And Submit Release metadata action
+        uses: relizaio/reliza-helm-action@1.3
+        with:
+          registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
+          registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
+          registry_host: ${{ secrets.HELM_CHART_REPO }}
+          helm_chart_name: $HELM_CHART_NAME
+          reliza_api_id: ${{ secrets.RELIZA_CD_API_ID }}
+          reliza_api_key: ${{ secrets.RELIZA_CD_API_KEY }}
+          path: $DIR
+          registry_type: CHARTMEUSEUM
 
-          # update version on the chart
-          sed -i "/version: /s/.*/version: $vvar/" ./Chart.yaml
-
-          # git commit and update
-          git config --global user.name 'reliza-auto'
-          git config --global user.email 'info@reliza.io'
-          git add ./Chart.yaml
-          git commit -m "chore: bump ecr regcred helm chart version to $vvar"
-          git push
-          commit_sha=$(git log -1 --pretty='%H')
-            
-          if [ ! -z "$last_commit" ]
-          then
-            commit_list=$(git log $last_commit..$commit_sha --date=iso-strict --pretty='%H|||%ad|||%s' -- ./ | base64 -w 0)
-          else
-            commit_list=$(git log -2 --date=iso-strict --pretty='%H|||%ad|||%s' -- ./ | base64 -w 0)
-          fi
-
-          # publish helm chart on Reliza Hub registry
-          docker run --rm -v $(pwd):/apps/helm relizaio/helmpush cm-push /apps/helm ${{ secrets.HELM_CHART_REPO }} -u '${{ secrets.RH_LIBRARY_HELM_LOGIN }}' -p '${{ secrets.RH_LIBRARY_HELM_PASS }}'
-            
-          # download and compute sha256 digest for helm chart package tgz
-          docker run --rm -v $(pwd)/helm:/apps/helm --entrypoint /bin/sh relizaio/helmpush -c "helm repo add repo ${{ secrets.HELM_CHART_REPO }} --username '${{ secrets.RH_LIBRARY_HELM_LOGIN }}' --password '${{ secrets.RH_LIBRARY_HELM_PASS }}' && helm pull repo/ecr-regcred -d /apps/helm/"
-          sha_digest=$(sha256sum helm/*.tgz | cut -f 1 -d ' ')
-          echo "shadigest = $sha_digest"
-            
-          # finally stream our release metadata back to Reliza
-          echo -n "-b $GITHUB_REF -v $vvar --commits $commit_list \
-            -i ${{ secrets.RELIZA_ECR_REGCRED_API_ID }} -k ${{ secrets.RELIZA_ECR_REGCRED_API_KEY }} \
-            --artid ${{ secrets.HELM_CHART_REPO }}ecr-regcred  --artbuildid github$GITHUB_ACTION$GITHUB_SHA \
-            --artbuilduri https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID \
-            --artcimeta GitHub Actions --arttype File --artdigests sha256:$sha_digest " > reliza_command
-
-          # debug   
-          # cat reliza_command
-          # send data
-
-          echo docker run --rm relizaio/reliza-cli addrelease $(cat reliza_command) > rlz_cmd_exec
-          eval $(cat rlz_cmd_exec)
-        else
-          echo "Artifact is already part of another release, not duplicating"
-        fi
-    - name: Build and submit release for reliza-watcher
-      run: |
-        dir=reliza-watcher
-        dobuild=false
-        last_commit=$(docker run --rm relizaio/reliza-cli getlatestrelease -i ${{ secrets.RELIZA_WATCHER_API_ID }} -k ${{ secrets.RELIZA_WATCHER_API_KEY }} --branch $GITHUB_REF | jq -r ".sourceCodeEntryDetails.commit")
-        if [ ! -z "$last_commit" ]
-        then
-          echo -n "--commits $(git log $last_commit..$GITHUB_SHA --date=iso-strict --pretty='%H|||%ad|||%s' -- $dir | base64 -w 0) " > commit_list
-          difflines=$(git diff $last_commit..$GITHUB_SHA $dir | wc -l)
-          if [ "$difflines" != "0" ]
-          then
-            dobuild=true
-          fi
-        else
-          dobuild=true
-        fi
-        if [ "$dobuild" == "true" ]
-        then
-          cd $dir
-          # obtain version
-          docker run --rm relizaio/reliza-cli getversion \
-            -i ${{ secrets.RELIZA_WATCHER_API_ID }} -k ${{ secrets.RELIZA_WATCHER_API_KEY }} -b $GITHUB_REF \
-            --commit $GITHUB_SHA --commitmessage \"$(git log -1 --pretty='%s')\ $(cat commit_list) > full_version_output 2>&1
-          echo "Version response:"
-          cat full_version_output
-          # now construct actual version variable
-          vvar=$(cat full_version_output | jq -r ".version")
-
-          # update version on the chart
-          sed -i "/version: /s/.*/version: $vvar/" ./Chart.yaml
-
-          # git commit and update
-          git config --global user.name 'reliza-auto'
-          git config --global user.email 'info@reliza.io'
-          git add ./Chart.yaml
-          git commit -m "chore: bump reliza-watcher helm chart version to $vvar"
-          git push
-          commit_sha=$(git log -1 --pretty='%H')
-            
-          if [ ! -z "$last_commit" ]
-          then
-            commit_list=$(git log $last_commit..$commit_sha --date=iso-strict --pretty='%H|||%ad|||%s' -- ./ | base64 -w 0)
-          else
-            commit_list=$(git log -2 --date=iso-strict --pretty='%H|||%ad|||%s' -- ./ | base64 -w 0)
-          fi
-
-          # publish helm chart on Reliza Hub registry
-          docker run --rm -v $(pwd):/apps/helm relizaio/helmpush cm-push /apps/helm ${{ secrets.HELM_CHART_REPO }} -u '${{ secrets.RH_LIBRARY_HELM_LOGIN }}' -p '${{ secrets.RH_LIBRARY_HELM_PASS }}'
-            
-          # download and compute sha256 digest for helm chart package tgz
-          docker run --rm -v $(pwd)/helm:/apps/helm --entrypoint /bin/sh relizaio/helmpush -c "helm repo add repo ${{ secrets.HELM_CHART_REPO }} --username '${{ secrets.RH_LIBRARY_HELM_LOGIN }}' --password '${{ secrets.RH_LIBRARY_HELM_PASS }}' && helm pull repo/reliza-watcher -d /apps/helm/"
-          sha_digest=$(sha256sum helm/*.tgz | cut -f 1 -d ' ')
-          echo "shadigest = $sha_digest"
-            
-          # finally stream our release metadata back to Reliza
-          echo -n "-b $GITHUB_REF -v $vvar --commits $commit_list \
-            -i ${{ secrets.RELIZA_WATCHER_API_ID }} -k ${{ secrets.RELIZA_WATCHER_API_KEY }} \
-            --artid ${{ secrets.HELM_CHART_REPO }}reliza-watcher  --artbuildid github$GITHUB_ACTION$GITHUB_SHA \
-            --artbuilduri https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID \
-            --artcimeta GitHub Actions --arttype File --artdigests sha256:$sha_digest " > reliza_command
-
-          # debug   
-          # cat reliza_command
-          # send data
-
-          echo docker run --rm relizaio/reliza-cli addrelease $(cat reliza_command) > rlz_cmd_exec
-          eval $(cat rlz_cmd_exec)
-        else
-          echo "Artifact is already part of another release, not duplicating"
-        fi
-    - name: Build and submit release for reliza-cd
-      run: |
-        dir=reliza-cd/reliza-cd
-        dobuild=false
-        last_commit=$(docker run --rm relizaio/reliza-cli getlatestrelease -i ${{ secrets.RELIZA_CD_API_ID }} -k ${{ secrets.RELIZA_CD_API_KEY }} --branch $GITHUB_REF | jq -r ".sourceCodeEntryDetails.commit")
-        if [ ! -z "$last_commit" ]
-        then
-          echo -n "--commits $(git log $last_commit..$GITHUB_SHA --date=iso-strict --pretty='%H|||%ad|||%s' -- $dir | base64 -w 0) " > commit_list
-          difflines=$(git diff $last_commit..$GITHUB_SHA $dir | wc -l)
-          if [ "$difflines" != "0" ]
-          then
-            dobuild=true
-          fi
-        else
-          dobuild=true
-        fi
-        if [ "$dobuild" == "true" ]
-        then
-          cd $dir
-          # obtain version
-          docker run --rm relizaio/reliza-cli getversion \
-            -i ${{ secrets.RELIZA_CD_API_ID }} -k ${{ secrets.RELIZA_CD_API_KEY }} -b $GITHUB_REF \
-            --commit $GITHUB_SHA --commitmessage \"$(git log -1 --pretty='%s')\ $(cat commit_list) > full_version_output 2>&1
-          echo "Version response:"
-          cat full_version_output
-          # now construct actual version variable
-          vvar=$(cat full_version_output | jq -r ".version")
-
-          # update version on the chart
-          sed -i "/version: /s/.*/version: $vvar/" ./Chart.yaml
-
-          # git commit and update
-          git config --global user.name 'reliza-auto'
-          git config --global user.email 'info@reliza.io'
-          git add ./Chart.yaml
-          git commit -m "chore: bump reliza-cd helm chart version to $vvar"
-          git push
-          commit_sha=$(git log -1 --pretty='%H')
-            
-          if [ ! -z "$last_commit" ]
-          then
-            commit_list=$(git log $last_commit..$commit_sha --date=iso-strict --pretty='%H|||%ad|||%s' -- ./ | base64 -w 0)
-          else
-            commit_list=$(git log -2 --date=iso-strict --pretty='%H|||%ad|||%s' -- ./ | base64 -w 0)
-          fi
-
-          # publish helm chart on Reliza Hub registry
-          docker run --rm -v $(pwd):/apps/helm relizaio/helmpush cm-push /apps/helm ${{ secrets.HELM_CHART_REPO }} -u '${{ secrets.RH_LIBRARY_HELM_LOGIN }}' -p '${{ secrets.RH_LIBRARY_HELM_PASS }}'
-            
-          # download and compute sha256 digest for helm chart package tgz
-          docker run --rm -v $(pwd)/helm:/apps/helm --entrypoint /bin/sh relizaio/helmpush -c "helm repo add repo ${{ secrets.HELM_CHART_REPO }} --username '${{ secrets.RH_LIBRARY_HELM_LOGIN }}' --password '${{ secrets.RH_LIBRARY_HELM_PASS }}' && helm pull repo/reliza-cd -d /apps/helm/"
-          sha_digest=$(sha256sum helm/*.tgz | cut -f 1 -d ' ')
-          echo "shadigest = $sha_digest"
-            
-          # finally stream our release metadata back to Reliza
-          echo -n "-b $GITHUB_REF -v $vvar --commits $commit_list \
-            -i ${{ secrets.RELIZA_CD_API_ID }} -k ${{ secrets.RELIZA_CD_API_KEY }} \
-            --artid ${{ secrets.HELM_CHART_REPO }}reliza-cd  --artbuildid github$GITHUB_ACTION$GITHUB_SHA \
-            --artbuilduri https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID \
-            --artcimeta GitHub Actions --arttype File --artdigests sha256:$sha_digest " > reliza_command
-
-          # debug   
-          # cat reliza_command
-          # send data
-
-          echo docker run --rm relizaio/reliza-cli addrelease $(cat reliza_command) > rlz_cmd_exec
-          eval $(cat rlz_cmd_exec)
-        else
-          echo "Artifact is already part of another release, not duplicating"
-        fi
+  build-reliza-watcher:
+    name: Build And Push Helm Chart
+    runs-on: ubuntu-latest
+    env:
+      HELM_CHART_NAME: reliza-watcher
+      DIR: reliza-watcher
+    steps:
+      - name: RelizaHub Build And Submit Release metadata action
+        uses: relizaio/reliza-helm-action@1.3
+        with:
+          registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
+          registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
+          registry_host: ${{ secrets.HELM_CHART_REPO }}
+          helm_chart_name: $HELM_CHART_NAME
+          reliza_api_id: ${{ secrets.RELIZA_WATCHER_API_ID }}
+          reliza_api_key: ${{ secrets.RELIZA_WATCHER_API_KEY }}
+          path: $DIR
+          registry_type: CHARTMEUSEUM
