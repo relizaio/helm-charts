@@ -4,7 +4,7 @@
 mode: STANDALONE # options: STANDALONE (ARGO mode to be added later)
 imagePullPolicy: IfNotPresent
 images:
-  relizacdImage: docker.io/relizaio/reliza-cd:23.01.8
+  relizacdImage: docker.io/relizaio/reliza-cd:23.01.9
 
 enableWatcher: true
 
