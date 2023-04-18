@@ -42,7 +42,7 @@ Add this chart to dependencies section of your Chart.yaml as following:
 dependencies:
   - name: ecr-regcred
     repository: "https://registry.relizahub.com/chartrepo/library"
-    version: ">=0.0.3"
+    version: ">=0.1.0"
 ```
 
 After that run `helm dependency update`
