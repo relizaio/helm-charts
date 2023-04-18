@@ -30,7 +30,7 @@ helm install ecr-regcred --set create_secret_in_chart=regular --set aws_id=YOUR_
 Most basic standalone installation for a Regular Registry:
 
 ```
-helm install ecr-regcred --set secret_type=regular --set create_secret_in_chart=regular --set aws_id=YOUR_AWS_IAM_ID --set aws_key=YOUR_AWS_IAM_KEY -n default reliza/ecr-regcred
+helm install ecr-regcred --set secret_type=regular --set create_secret_in_chart=regular --set registry_login=YOUR_AWS_IAM_ID --set registry_token=YOUR_AWS_IAM_KEY -n default reliza/ecr-regcred
 ```
 
 
