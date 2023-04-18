@@ -1,12 +1,15 @@
 # Default values for ecr-regcred by Reliza.
 
 enabled: true
-aws_id: placeholder_base64
-aws_key: placeholder_base64
+aws_id: placeholder # for ecr type
+aws_key: placeholder # for ecr type
+registry_login: placeholder # for regular type
+registry_token: placeholder # for regular type
 create_secret_in_chart: none # or "regular" for plane secret or "sealed" for bitnami sealed secrets
 registry_server: awsid.dkr.ecr.awsregion.amazonaws.com
 registry_email: myemail@mytest.me
 secret_name: regcred
+secret_type: ecr # ecr or regular
 sealed_secrets_scope: namespace-wide # other possible values: strict, cluster-wide, see https://github.com/bitnami-labs/sealed-secrets#scopes
 # namespace_override: use to override Release Namespace
 kubectl:

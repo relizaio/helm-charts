@@ -1,4 +1,4 @@
-{{- if and (.Values.enabled) (eq .Values.secret_type "ecr") }}
+{{- if and (.Values.enabled) (eq .Values.secret_type "regular") }}
 {{- if eq .Values.create_secret_in_chart "regular"}}
 apiVersion: v1
 kind: Secret
@@ -7,8 +7,8 @@ metadata:
   namespace: {{ .Values.namespace_override | default .Release.Namespace }}
 type: Opaque
 data:
-  AWS_ACCESS_KEY_ID: {{ .Values.aws_id | b64enc | quote }}
-  AWS_SECRET_ACCESS_KEY: {{ .Values.aws_key | b64enc | quote }}
+  REGISTRY_LOGIN: {{ .Values.registry_login | b64enc | quote }}
+  REGISTRY_TOKEN: {{ .Values.registry_token | b64enc | quote }}
 ---
 {{- else if eq .Values.create_secret_in_chart "sealed"}}
 apiVersion: bitnami.com/v1alpha1
@@ -25,8 +25,8 @@ metadata:
   {{- end }}
 spec:
   encryptedData:
-    AWS_ACCESS_KEY_ID: {{ .Values.aws_id | quote }}
-    AWS_SECRET_ACCESS_KEY: {{ .Values.aws_key | quote }}
+    REGISTRY_LOGIN: {{ .Values.registry_login | quote }}
+    REGISTRY_TOKEN: {{ .Values.registry_token | quote }}
 ---
 {{- end}}
 apiVersion: v1
@@ -84,23 +84,15 @@ spec:
   template:
     spec:
       serviceAccount: reliza-ecr-regcred-sa
-      initContainers:
-      - name: aws-ecr-auth
-        image: amazon/aws-cli
-        command: ['/bin/bash', '-c', '/usr/local/bin/aws ecr get-login-password --region us-east-1 > /apps/work-values/aws']
-        envFrom:
-        - secretRef:
-            name: reliza-ecr-regcred
-        volumeMounts:
-        - mountPath: "/apps/work-values"
-          name: shared-data
       containers:
-      - command: ['/bin/sh', '-c', 'export DOCKER_PASS=$(cat /apps/work-values/aws); kubectl create secret docker-registry regcred --docker-server=$REGISTRY_SERVER --docker-username=AWS --docker-password=$DOCKER_PASS --docker-email=$EMAIL -n $NAMESPACE_TO_DEPLOY --dry-run=client -o yaml | kubectl apply -f -']
+      - command: ['/bin/sh', '-c', 'kubectl create secret docker-registry regcred --docker-server=$REGISTRY_SERVER --docker-username=$REGISTRY_LOGIN --docker-password=$REGISTRY_TOKEN --docker-email=$EMAIL -n $NAMESPACE_TO_DEPLOY --dry-run=client -o yaml | kubectl apply -f -']
         image: {{ .Values.kubectl.image }}
         name: kubectl
         resources: {}
         envFrom:
         - configMapRef:
+            name: reliza-ecr-regcred
+        - secretRef:
             name: reliza-ecr-regcred
         volumeMounts:
         - mountPath: "/apps/work-values"
@@ -128,23 +120,15 @@ spec:
       template:
         spec:
           serviceAccount: reliza-ecr-regcred-sa
-          initContainers:
-          - name: aws-ecr-auth
-            image: amazon/aws-cli
-            command: ['/bin/bash', '-c', '/usr/local/bin/aws ecr get-login-password --region us-east-1 > /apps/work-values/aws']
-            envFrom:
-            - secretRef:
-                name: reliza-ecr-regcred
-            volumeMounts:
-            - mountPath: "/apps/work-values"
-              name: shared-data
           containers:
-          - command: ['/bin/sh', '-c', 'export DOCKER_PASS=$(cat /apps/work-values/aws); kubectl create secret docker-registry regcred --docker-server=$REGISTRY_SERVER --docker-username=AWS --docker-password=$DOCKER_PASS --docker-email=$EMAIL -n $NAMESPACE_TO_DEPLOY --dry-run=client -o yaml | kubectl apply -f -']
+          - command: ['/bin/sh', '-c', 'kubectl create secret docker-registry regcred --docker-server=$REGISTRY_SERVER --docker-username=$REGISTRY_LOGIN --docker-password=$REGISTRY_TOKEN --docker-email=$EMAIL -n $NAMESPACE_TO_DEPLOY --dry-run=client -o yaml | kubectl apply -f -']
             image: {{ .Values.kubectl.image }}
             name: kubectl
             resources: {}
             envFrom:
             - configMapRef:
+                name: reliza-ecr-regcred        
+            - secretRef:
                 name: reliza-ecr-regcred
             volumeMounts:
             - mountPath: "/apps/work-values"
