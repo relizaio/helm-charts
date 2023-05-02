@@ -143,7 +143,7 @@ Create your Instance on [Reliza Hub](https://relizahub.com) and obtain Instance 
 Basic installation (creates secret in chart):
 
 ```
-helm upgrade --install reliza-cd --create-namespace -n reliza-cd --set create_secret_in_chart=regular --set rhApiKeyId=actual_reliza_api_id --set rhApiKey=actual_reliza_api_key reliza/reliza-cd
+helm upgrade --install reliza-cd --create-namespace -n reliza-cd --set create_secret_in_chart=regular --set relizaApiId=actual_reliza_api_id --set relizaApiKey=actual_reliza_api_key reliza/reliza-cd
 ```
 This will allow further control of the instance from Reliza Hub.
 
