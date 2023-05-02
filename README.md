@@ -131,3 +131,33 @@ Also we recommend to initialize it as disabled in root values.yaml, and then cus
 reliza-watcher:
   enabled: true
 ```
+
+## 3. Reliza CD Helm Chart
+Create your Instance on [Reliza Hub](https://relizahub.com) and obtain Instance API ID and API Key.
+
+Basic installation (creates secret in chart):
+
+```
+helm upgrade --install reliza-cd --create-namespace -n reliza-cd --set create_secret_in_chart=regular --set rhApiKeyId=actual_reliza_api_id --set rhApiKey=actual_reliza_api_key reliza/reliza-cd
+```
+This will allow further control of the instance from Reliza Hub.
+
+Alternatively, pre-create `reliza-cd` secret as following:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: reliza-cd
+  namespace: reliza-cd
+type: Opaque
+data:
+  APIKEYID: base64-d-id
+  APIKEY: base64-d-key
+```
+
+With the secret created, simply install as:
+
+```
+helm upgrade --install reliza-cd --create-namespace -n reliza-cd reliza/reliza-cd
+```
