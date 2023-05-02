@@ -8,6 +8,11 @@ helm repo add reliza https://registry.relizahub.com/chartrepo/library
 helm repo update
 ```
 
+# Charts
+1. [ECR-Regcred Helm Chart](#1-ecr-regcred-helm-chart)
+2. [Reliza Watcher Helm Chart](#2-reliza-watcher-helm-chart)
+3. [Reliza CD Helm Chart](#3-reliza-cd-helm-chart)
+
 ## 1. ECR-Regcred Helm Chart
 
 This chart is built to be used stand-alone or as a dependency which creates a regcred secret for AWS ECR or a regcred file for a regular container registry.
