@@ -11,16 +11,15 @@ jobs:
       DIR: ecr-regcred
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@1.3
+        uses: relizaio/reliza-helm-action@1.9
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
-          registry_host: ${{ secrets.HELM_CHART_REPO }}
+          registry_host: ${{ secrets.HELM_OCI_REPO }}
           helm_chart_name: $HELM_CHART_NAME
           reliza_api_id: ${{ secrets.RELIZA_ECR_REGCRED_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_ECR_REGCRED_API_KEY }}
           path: $DIR
-          registry_type: CHARTMEUSEUM
           
   build-reliza-cd:
     name: Build RELIZA CD
@@ -30,16 +29,15 @@ jobs:
       DIR: reliza-cd
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@1.3
+        uses: relizaio/reliza-helm-action@1.9
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
-          registry_host: ${{ secrets.HELM_CHART_REPO }}
+          registry_host: ${{ secrets.HELM_OCI_REPO }}
           helm_chart_name: $HELM_CHART_NAME
           reliza_api_id: ${{ secrets.RELIZA_CD_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_CD_API_KEY }}
           path: $DIR
-          registry_type: CHARTMEUSEUM
 
   build-reliza-watcher:
     name: Build RELIZA WATCHER
@@ -49,13 +47,12 @@ jobs:
       DIR: reliza-watcher
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@1.3
+        uses: relizaio/reliza-helm-action@1.9
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
-          registry_host: ${{ secrets.HELM_CHART_REPO }}
+          registry_host: ${{ secrets.HELM_OCI_REPO }}
           helm_chart_name: $HELM_CHART_NAME
           reliza_api_id: ${{ secrets.RELIZA_WATCHER_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_WATCHER_API_KEY }}
           path: $DIR
-          registry_type: CHARTMEUSEUM
