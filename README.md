@@ -1,11 +1,10 @@
 # This repository contains a set of public helm charts by Reliza
 
 
-For all charts below use the following to add Reliza chart repository on your system:
+For all charts below use the following outline to install chart on your cluster:
 
 ```
-helm repo add reliza https://registry.relizahub.com/chartrepo/library
-helm repo update
+helm install <chart-name> oci://registry.relizahub.com/library/<chart-name>
 ```
 
 # Charts
@@ -29,13 +28,13 @@ Currently, this chart supports 3 modes configurable via create_secret_in_chart p
 Most basic standalone installation for ECR:
 
 ```
-helm install ecr-regcred --set create_secret_in_chart=regular --set aws_id=YOUR_AWS_IAM_ID --set aws_key=YOUR_AWS_IAM_KEY -n default reliza/ecr-regcred
+helm install ecr-regcred --set create_secret_in_chart=regular --set aws_id=YOUR_AWS_IAM_ID --set aws_key=YOUR_AWS_IAM_KEY -n default oci://registry.relizahub.com/library/ecr-regcred
 ```
 
 Most basic standalone installation for a Regular Registry:
 
 ```
-helm install ecr-regcred --set secret_type=regular --set create_secret_in_chart=regular --set registry_login=YOUR_AWS_IAM_ID --set registry_token=YOUR_AWS_IAM_KEY -n default reliza/ecr-regcred
+helm install ecr-regcred --set secret_type=regular --set create_secret_in_chart=regular --set registry_login=YOUR_AWS_IAM_ID --set registry_token=YOUR_AWS_IAM_KEY -n default oci://registry.relizahub.com/library/ecr-regcred
 ```
 
 
@@ -46,8 +45,8 @@ Add this chart to dependencies section of your Chart.yaml as following:
 ```
 dependencies:
   - name: ecr-regcred
-    repository: "https://registry.relizahub.com/chartrepo/library"
-    version: ">=0.1.0"
+    repository: "oci://registry.relizahub.com/library"
+    version: ">=0.1.2"
 ```
 
 After that run `helm dependency update`
@@ -62,7 +61,7 @@ Basic installation to monitor all namespaces (creates secret in chart):
 
 ```
 kubectl create ns reliza-watcher
-helm install reliza-watcher -n reliza-watcher --set create_secret_in_chart=regular --set relizaApiId=actual_reliza_api_id --set relizaApiKey=actual_reliza_api_key reliza/reliza-watcher
+helm install reliza-watcher -n reliza-watcher --set create_secret_in_chart=regular --set relizaApiId=actual_reliza_api_id --set relizaApiKey=actual_reliza_api_key oci://registry.relizahub.com/library/reliza-watcher
 ```
 
 Currently, this chart supports 3 modes for the `reliza-watcher` secret containing Reliza Hub credentials configurable via `create_secret_in_chart` property in values.
@@ -75,7 +74,7 @@ Currently, this chart supports 3 modes for the `reliza-watcher` secret containin
 1. If you would like to watch only specific namespaces, say *default* and *myappnamespace*, leverage the `namespace` property when installing helmchart (provide comma-separated namespaces as a value for namespace key) - as shown below:
 
 ```
-helm install reliza-watcher -n reliza-watcher --set namespace="default\,myappnamespace" reliza/reliza-watcher
+helm install reliza-watcher -n reliza-watcher --set namespace="default\,myappnamespace" oci://registry.relizahub.com/library/reliza-watcher
 ```
 
 2. Sender id can be set to any string via *sender* property. Data from different senders will be combined on the Reliza Hub in the instance view.
@@ -90,12 +89,12 @@ Assume you have two instances *instance-A* and *instance-B* on [Reliza Hub](http
 2. Issue following commands replacing <RELIZA_API_ID_FOR_INSTANCE_A> and <RELIZA_API_KEY_INSTANCE_A> with values obtained from Reliza Hub:
 ```
 kubectl create secret generic reliza-watcher -n <ns-A> --from-literal=reliza-api-id=<RELIZA_API_ID_FOR_INSTANCE_A> --from-literal=reliza-api-key=<RELIZA_API_KEY_INSTANCE_A>
-helm install reliza-watcher -n <ns-A> --set namespace="ns-A" reliza/reliza-watcher
+helm install reliza-watcher -n <ns-A> --set namespace="ns-A" oci://registry.relizahub.com/library/reliza-watcher
 ```
 3. Issue following commands replacing <RELIZA_API_ID_FOR_INSTANCE_B> and <RELIZA_API_KEY_INSTANCE_B> with values obtained from Reliza Hub:
 ```
 kubectl create secret generic reliza-watcher -n <ns-B> --from-literal=reliza-api-id=<RELIZA_API_ID_FOR_INSTANCE_B> --from-literal=reliza-api-key=<RELIZA_API_KEY_INSTANCE_B>
-helm install reliza-watcher -n <ns-B> --set namespace="ns-B" reliza/reliza-watcher
+helm install reliza-watcher -n <ns-B> --set namespace="ns-B" oci://registry.relizahub.com/library/reliza-watcher
 ```
 
 Note that this last example also shows reliza-watcher secret created outside of the helm chart.
@@ -111,8 +110,8 @@ Add this chart to dependencies section of your Chart.yaml as following:
 ```
 dependencies:
   - name: reliza-watcher
-    repository: "https://registry.relizahub.com/chartrepo/library"
-    version: ">=0.0.0"
+    repository: "oci://registry.relizahub.com/library"
+    version: ">=0.0.2"
 ```
 
 After that run `helm dependency update`
@@ -143,7 +142,7 @@ Create your Instance on [Reliza Hub](https://relizahub.com) and obtain Instance 
 Basic installation (creates secret in chart):
 
 ```
-helm upgrade --install reliza-cd --create-namespace -n reliza-cd --set create_secret_in_chart=regular --set relizaApiId=actual_reliza_api_id --set relizaApiKey=actual_reliza_api_key reliza/reliza-cd
+helm upgrade --install reliza-cd --create-namespace -n reliza-cd --set create_secret_in_chart=regular --set relizaApiId=actual_reliza_api_id --set relizaApiKey=actual_reliza_api_key oci://registry.relizahub.com/library/reliza-cd
 ```
 This will allow further control of the instance from Reliza Hub.
 
@@ -164,5 +163,5 @@ data:
 With the secret created, simply install as:
 
 ```
-helm upgrade --install reliza-cd --create-namespace -n reliza-cd reliza/reliza-cd
+helm upgrade --install reliza-cd --create-namespace -n reliza-cd oci://registry.relizahub.com/library/reliza-cd
 ```
