@@ -11,7 +11,7 @@ jobs:
       DIR: ecr-regcred
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@1.10
+        uses: relizaio/reliza-helm-action@1.11
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -29,7 +29,7 @@ jobs:
       DIR: reliza-cd
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@1.10
+        uses: relizaio/reliza-helm-action@1.11
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -47,7 +47,7 @@ jobs:
       DIR: reliza-watcher
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@1.10
+        uses: relizaio/reliza-helm-action@1.11
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
