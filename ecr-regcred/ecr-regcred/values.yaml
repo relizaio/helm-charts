@@ -13,4 +13,4 @@ secret_type: ecr # ecr or regular
 sealed_secrets_scope: namespace-wide # other possible values: strict, cluster-wide, see https://github.com/bitnami-labs/sealed-secrets#scopes
 # namespace_override: use to override Release Namespace
 kubectl:
-  image: bitnami/kubectl:1.24.1
+  image: bitnami/kubectl:1.28.4
