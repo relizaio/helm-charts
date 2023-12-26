@@ -26,6 +26,8 @@ spec:
           env:
           - name: MY_NAMESPACE
             value: {{ .Release.Namespace }}
+          - name: MODE
+            value: {{ .Values.mode }}
           - name: ENABLE_WATCHER
             value: {{ .Values.enableWatcher | quote }}
           - name: WATCHER_IMAGE

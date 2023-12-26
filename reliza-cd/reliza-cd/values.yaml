@@ -1,10 +1,10 @@
 # Default values for reliza-cd.
 # This is a YAML-formatted file.
 
-mode: STANDALONE # options: STANDALONE (ARGO mode to be added later)
+mode: STANDALONE # options: STANDALONE, EXISTING_ARGO 
 imagePullPolicy: IfNotPresent
 images:
-  relizacdImage: docker.io/relizaio/reliza-cd:23.01.30
+  relizacdImage: docker.io/relizaio/reliza-cd:23.12.0
 
 enableWatcher: true
 
