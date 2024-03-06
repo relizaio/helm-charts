@@ -28,6 +28,8 @@ spec:
             value: {{ .Release.Namespace }}
           - name: MODE
             value: {{ .Values.mode }}
+          - name: ARGO_HELM_VERSION
+            value: {{ .Values.argoHelmVersion }}
           - name: ENABLE_WATCHER
             value: {{ .Values.enableWatcher | quote }}
           - name: WATCHER_IMAGE

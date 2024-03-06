@@ -4,7 +4,7 @@
 mode: STANDALONE # options: STANDALONE, EXISTING_ARGO, NEW_ARGO
 imagePullPolicy: IfNotPresent
 images:
-  relizacdImage: docker.io/relizaio/reliza-cd:24.01.3
+  relizacdImage: docker.io/relizaio/reliza-cd:24.01.4
 
 enableWatcher: true
 
@@ -14,3 +14,4 @@ create_secret_in_chart: none # regular, none
 hubUri: https://app.relizahub.com
 relizaApiId: placeholder # instance api id
 relizaApiKey: placeholder # instance api key
+argoHelmVersion: 6.6.0
