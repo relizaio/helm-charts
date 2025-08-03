@@ -19,6 +19,8 @@ spec:
         app: reliza-cd
     spec:
       serviceAccount: {{ .Release.Namespace }}-{{ .Release.Name }}-reliza-cd
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: {{ .Chart.Name }}-reliza-cd
           image: "{{ .Values.images.relizacdImage }}"
