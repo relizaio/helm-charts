@@ -5,7 +5,7 @@ apiVersion: v2
 name: common
 description: A Library Helm Chart for grouping common logic between Reliza charts. This chart is not deployable by itself.
 type: library
-version: 1.0.0
+version: 0.0.0
 appVersion: 1.0.0
 home: https://reliza.io
 keywords:
