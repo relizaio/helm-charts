@@ -73,7 +73,7 @@ jobs:
           helm_chart_name: reliza-common
           reliza_api_id: ${{ secrets.RELIZA_COMMON_HELM_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_COMMON_HELM_API_KEY }}
-          path: common
+          path: reliza-common
 
   build-reliza-postgres-helm:
     permissions:

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 apiVersion: v2
-name: common
+name: reliza-common
 description: A Library Helm Chart for grouping common logic between Reliza charts. This chart is not deployable by itself.
 type: library
 version: 0.0.0
