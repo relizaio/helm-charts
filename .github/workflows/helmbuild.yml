@@ -56,3 +56,21 @@ jobs:
           reliza_api_id: ${{ secrets.RELIZA_WATCHER_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_WATCHER_API_KEY }}
           path: $DIR
+
+
+  build-common-helm:
+    permissions:
+      contents: write
+    name: Build And Push Common Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: RelizaHub Build And Submit Common Helm metadata action
+        uses: relizaio/reliza-helm-action@c63d479f4fd1fce07a5b13a928afb1a196bb83a1 # v3.8
+        with:
+          registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
+          registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
+          registry_host: registry.relizahub.com/library
+          helm_chart_name: reliza-common
+          reliza_api_id: ${{ secrets.RELIZA_COMMON_HELM_API_ID }}
+          reliza_api_key: ${{ secrets.RELIZA_COMMON_HELM_API_KEY }}
+          path: common
