@@ -1,0 +1,6 @@
+dependencies:
+- name: common
+  repository: oci://registry.relizahub.com/library
+  version: 0.0.0
+digest: sha256:2302c920ea53827b30851bc0f26a2da57560afbabd2bf7be17557e3dde4a18aa
+generated: "2025-09-11T21:57:04.895188457+05:30"
