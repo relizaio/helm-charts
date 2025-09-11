@@ -16,9 +16,9 @@ annotations:
 apiVersion: v2
 appVersion: 17.6.0
 dependencies:
-- name: common
+- name: reliza-common
   repository: oci://registry.relizahub.com/library
-  version: 0.0.0
+  version: 0.0.1
 description: PostgreSQL (Postgres) is an open source object-relational database known
   for reliability and data integrity. ACID-compliant, it supports foreign keys, joins,
   views, triggers and stored procedures.
