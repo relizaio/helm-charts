@@ -37,4 +37,4 @@ maintainers:
 name: reliza-postgresql
 sources:
 - https://github.com/relizaio/bitnami-chart-migration
-version: 0.0.0
+version: 0.0.1
