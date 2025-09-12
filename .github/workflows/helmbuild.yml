@@ -75,7 +75,7 @@ jobs:
           reliza_api_key: ${{ secrets.RELIZA_COMMON_HELM_API_KEY }}
           path: reliza-common
 
-  build-reliza-postgres-helm:
+  build-postgresql-helm:
     permissions:
       contents: write
     name: Build And Push Reliza Postgresql Helm Chart
@@ -87,7 +87,7 @@ jobs:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
           registry_host: registry.relizahub.com/library
-          helm_chart_name: reliza-postgresql
+          helm_chart_name: postgresql
           reliza_api_id: ${{ secrets.RELIZA_POSTGRESQL_HELM_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_POSTGRESQL_HELM_API_KEY }}
           path: reliza-postgresql

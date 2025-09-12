@@ -34,7 +34,7 @@ keywords:
 maintainers:
 - name: Reliza Incorporated
   url: https://github.com/relizaio
-name: reliza-postgresql
+name: postgresql
 sources:
 - https://github.com/relizaio/bitnami-chart-migration
 version: 0.0.2
