@@ -1,0 +1,9 @@
+{{- /*
+Copyright Reliza Incorporated. All Rights Reserved.
+SPDX-License-Identifier: MIT
+*/}}
+
+{{- range .Values.extraDeploy }}
+---
+{{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+{{- end }}
