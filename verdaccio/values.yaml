@@ -1,0 +1,85 @@
+# Default values for verdaccio.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image: registry.relizahub.com/library/reliza-verdaccio@sha256:c400f5145ef12da4b4f59800c1b9cdb3444f9591d11ed0c863906c882a71fec8
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 10001
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 10001
+
+service:
+  type: ClusterIP
+  port: 4873
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Persistent Volume Claim
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 8Gi
+  storageClass: ""
+
+# Environment variables
+env:
+  VERDACCIO_USER_NAME: verdaccio
+  VERDACCIO_USER_UID: "10001"
+
+# Quarantine configuration
+quarantineDays: 7
+
+# Health check configuration
+healthcheck:
+  enabled: true
+  path: "/-/ping"
+  initialDelaySeconds: 40
+  periodSeconds: 30
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+# Traefik ingress configuration
+useTraefikLe: true
+traefikBehindLb: false
+ingressHost: verdaccio.localhost
+servicePort: 4873

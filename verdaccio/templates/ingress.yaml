@@ -1,0 +1,68 @@
+{{- if .Values.useTraefikLe}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "verdaccio.fullname" . }}-web-ingressroute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "verdaccio.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`{{ .Values.ingressHost}}`)
+    kind: Rule
+    services:
+    - name: {{ include "verdaccio.fullname" . }}
+      port: {{ .Values.servicePort }}
+    middlewares:
+      - name: {{ include "verdaccio.fullname" . }}-redirect
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "verdaccio.fullname" . }}-websecure-ingressroute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "verdaccio.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`{{ .Values.ingressHost}}`)
+    kind: Rule
+    services:
+    - name: {{ include "verdaccio.fullname" . }}
+      port: {{ .Values.servicePort }}
+  tls:
+    certResolver: le
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "verdaccio.fullname" . }}-redirect
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "verdaccio.labels" . | nindent 4 }}
+spec:
+  redirectScheme:
+    scheme: https
+{{- end}}
+{{- if .Values.traefikBehindLb}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "verdaccio.fullname" . }}-web-ingressroute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "verdaccio.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`{{ .Values.ingressHost }}`)
+    kind: Rule
+    services:
+    - name: {{ include "verdaccio.fullname" . }}
+      port: {{ .Values.servicePort }}
+{{- end}}

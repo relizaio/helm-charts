@@ -1,0 +1,18 @@
+apiVersion: v2
+name: verdaccio
+description: A Helm chart for Verdaccio npm registry
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - npm
+  - registry
+  - verdaccio
+  - reliza
+home: https://verdaccio.org/
+sources:
+  - https://github.com/verdaccio/verdaccio
+  - https://github.com/relizaio/dockerfile-collection
+maintainers:
+  - name: Reliza
+    email: support@reliza.io
