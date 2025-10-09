@@ -1,0 +1,24 @@
+apiVersion: v2
+name: harbor
+description: Harbor container registry with PostgreSQL 17 and Traefik ingress
+type: application
+version: 2.0.0
+appVersion: "2.14.0"
+
+home: https://reliza.io
+sources:
+  - https://github.com/relizaio/helm-charts
+
+maintainers:
+  - name: Reliza Incorporated
+
+dependencies:
+  - name: postgresql
+    version: 0.1.0
+    repository: oci://registry.relizahub.com/library
+    condition: postgresql.enabled
+  
+  - name: harbor
+    version: 1.16.1
+    repository: https://helm.goharbor.io
+    condition: harbor.enabled

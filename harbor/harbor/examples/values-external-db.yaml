@@ -1,0 +1,51 @@
+# Example: Harbor with External PostgreSQL
+
+global:
+  storageClass: fast-ssd
+  postgresql:
+    auth:
+      password: ""  # Not used
+
+externalDatabase:
+  enabled: true
+  host: postgres.example.com
+  port: 5432
+  username: harbor_user
+  password: "SecurePassword123"
+  database: harbor
+  sslmode: require
+
+postgresql:
+  enabled: false  # Don't deploy bundled PostgreSQL
+
+harbor:
+  externalURL: https://registry.example.com
+  harborAdminPassword: "ChangeMe123"
+  
+  database:
+    type: external
+    external:
+      host: "postgres.example.com"
+      port: "5432"
+      username: "harbor_user"
+      password: "SecurePassword123"
+      coreDatabase: "harbor"
+      sslmode: "require"
+  
+  persistence:
+    persistentVolumeClaim:
+      registry:
+        size: 5Gi
+      jobservice:
+        jobLog:
+          size: 1Gi
+      trivy:
+        size: 5Gi
+
+ingress:
+  enabled: true
+  type: ingressroute
+  host: registry.example.com
+  tls:
+    enabled: true
+    certResolver: le

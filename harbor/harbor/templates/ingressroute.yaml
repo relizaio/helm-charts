@@ -1,0 +1,52 @@
+{{- if and .Values.ingress.enabled (eq .Values.ingress.type "ingressroute") }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-ingressroute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - {{ .Values.ingress.entryPoint }}
+  routes:
+    - match: Host(`{{ .Values.ingress.host }}`)
+      kind: Rule
+      {{- if .Values.ingress.createMiddlewares }}
+      middlewares:
+        {{- if .Values.ingress.httpsRedirect.enabled }}
+        - name: {{ .Release.Name }}-https-redirect
+        {{- end }}
+        {{- if .Values.ingress.ipWhitelist.enabled }}
+        - name: {{ .Release.Name }}-ip-whitelist
+        {{- end }}
+      {{- end }}
+      services:
+        - name: harbor
+          port: 80
+{{- if .Values.ingress.tls.enabled }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-ingressroute-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - {{ .Values.ingress.tlsEntryPoint }}
+  routes:
+    - match: Host(`{{ .Values.ingress.host }}`)
+      kind: Rule
+      services:
+        - name: harbor
+          port: 80
+  tls:
+    {{- if .Values.ingress.tls.certResolver }}
+    certResolver: {{ .Values.ingress.tls.certResolver }}
+    {{- else if .Values.ingress.tls.secretName }}
+    secretName: {{ .Values.ingress.tls.secretName }}
+    {{- end }}
+{{- end }}
+{{- end }}

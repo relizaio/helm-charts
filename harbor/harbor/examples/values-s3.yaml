@@ -1,0 +1,40 @@
+# Example: Harbor with S3 Storage
+
+global:
+  storageClass: fast-ssd
+
+postgresql:
+  enabled: true
+
+harbor:
+  externalURL: https://registry.example.com
+  harborAdminPassword: "ChangeMe123"
+  
+  persistence:
+    persistentVolumeClaim:
+      registry:
+        size: 0  # Not used with S3
+      jobservice:
+        jobLog:
+          size: 1Gi
+      trivy:
+        size: 5Gi
+    
+    imageChartStorage:
+      type: s3
+      s3:
+        region: us-east-1
+        bucket: my-harbor-registry
+        accesskey: ""  # Use IAM role or set credentials
+        secretkey: ""
+        encrypt: true
+        secure: true
+        v4auth: true
+
+ingress:
+  enabled: true
+  type: ingressroute
+  host: registry.example.com
+  tls:
+    enabled: true
+    certResolver: le

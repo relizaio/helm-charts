@@ -1,0 +1,43 @@
+# Example: Harbor with Traefik IngressRoute
+
+global:
+  storageClass: ""
+
+postgresql:
+  enabled: true
+
+harbor:
+  externalURL: https://harbor.example.com
+  harborAdminPassword: "ChangeMe123"
+  
+  expose:
+    type: clusterIP  # Use ClusterIP when using IngressRoute
+    tls:
+      enabled: false
+
+ingress:
+  enabled: true
+  type: ingressroute
+  host: harbor.example.com
+  
+  entryPoint: web
+  tlsEntryPoint: websecure
+  
+  # Enable middlewares
+  createMiddlewares: true
+  
+  # HTTPS redirect
+  httpsRedirect:
+    enabled: true
+  
+  # IP whitelist (optional)
+  ipWhitelist:
+    enabled: true
+    sourceRange:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+  
+  # TLS with Let's Encrypt
+  tls:
+    enabled: true
+    certResolver: le  # Your cert-manager resolver name

@@ -1,0 +1,27 @@
+{{- if and .Values.ingress.enabled (eq .Values.ingress.type "ingressroute") .Values.ingress.createMiddlewares }}
+{{- if .Values.ingress.httpsRedirect.enabled }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-https-redirect
+  namespace: {{ .Release.Namespace }}
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+{{- end }}
+
+{{- if .Values.ingress.ipWhitelist.enabled }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-ip-whitelist
+  namespace: {{ .Release.Namespace }}
+spec:
+  ipWhiteList:
+    sourceRange:
+      {{- toYaml .Values.ingress.ipWhitelist.sourceRange | nindent 6 }}
+{{- end }}
+{{- end }}

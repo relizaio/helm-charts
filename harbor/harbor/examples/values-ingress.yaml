@@ -1,0 +1,34 @@
+# Example: Harbor with Standard Ingress
+
+global:
+  storageClass: ""
+
+postgresql:
+  enabled: true
+
+harbor:
+  externalURL: https://harbor.example.com
+  harborAdminPassword: "ChangeMe123"
+  
+  expose:
+    type: ingress
+    tls:
+      enabled: true
+    ingress:
+      hosts:
+        core: harbor.example.com
+
+ingress:
+  enabled: true
+  type: ingress
+  host: harbor.example.com
+  className: nginx
+  
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  
+  tls:
+    enabled: true
+    secretName: harbor-tls

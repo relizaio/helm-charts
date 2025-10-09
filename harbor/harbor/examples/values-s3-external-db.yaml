@@ -1,0 +1,56 @@
+# Example: Harbor with S3 Storage + External PostgreSQL
+
+externalDatabase:
+  enabled: true
+  host: postgres.example.com
+  port: 5432
+  username: harbor_user
+  password: "SecurePassword123"
+  database: harbor
+  sslmode: require
+
+postgresql:
+  enabled: false
+
+harbor:
+  externalURL: https://registry.example.com
+  harborAdminPassword: "ChangeMe123"
+  
+  database:
+    type: external
+    external:
+      host: "postgres.example.com"
+      port: "5432"
+      username: "harbor_user"
+      password: "SecurePassword123"
+      coreDatabase: "harbor"
+      sslmode: "require"
+  
+  persistence:
+    persistentVolumeClaim:
+      registry:
+        size: 0  # Not used with S3
+      jobservice:
+        jobLog:
+          size: 1Gi
+      trivy:
+        size: 5Gi
+    
+    imageChartStorage:
+      type: s3
+      s3:
+        region: us-east-1
+        bucket: my-harbor-registry
+        accesskey: ""
+        secretkey: ""
+        encrypt: true
+        secure: true
+        v4auth: true
+
+ingress:
+  enabled: true
+  type: ingressroute
+  host: registry.example.com
+  tls:
+    enabled: true
+    certResolver: le

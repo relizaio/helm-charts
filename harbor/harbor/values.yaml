@@ -1,0 +1,123 @@
+# Relizaio Harbor - Default Configuration
+
+global:
+  storageClass: ""  # Use cluster default
+  postgresql:
+    auth:
+      username: postgres
+      password: "changeme"
+      database: registry
+
+# External Database (set enabled: true to use external PostgreSQL)
+externalDatabase:
+  enabled: false
+  host: "postgres.example.com"
+  port: 5432
+  username: postgres
+  password: ""
+  database: registry
+  sslmode: require
+
+# PostgreSQL 17 (bundled - only used when externalDatabase.enabled=false)
+postgresql:
+  enabled: true
+  image:
+    registry: registry.relizahub.com
+    repository: library/rearm-postgres
+    tag: "0.1.0"
+  primary:
+    persistence:
+      size: 8Gi
+
+# Harbor Configuration
+harbor:
+  enabled: true
+  
+  externalURL: http://harbor.local
+  harborAdminPassword: "Harbor12345"
+  
+  # Expose configuration
+  expose:
+    type: clusterIP
+    tls:
+      enabled: false
+  
+  # Database - configured based on externalDatabase.enabled above
+  database:
+    type: external
+    external:
+      host: ""  # Set to externalDatabase.host or leave empty for bundled
+      port: "5432"
+      username: "postgres"
+      password: ""
+      coreDatabase: "registry"
+      sslmode: "disable"
+  
+  # Redis
+  redis:
+    type: internal
+  
+  # Storage
+  persistence:
+    enabled: true
+    resourcePolicy: "keep"
+    
+    persistentVolumeClaim:
+      # Registry - only used when imageChartStorage.type=filesystem
+      registry:
+        size: 5Gi
+      
+      # JobService - always needed
+      jobservice:
+        jobLog:
+          size: 1Gi
+      
+      # Trivy - always needed
+      trivy:
+        size: 5Gi
+    
+    # Image storage backend (filesystem, s3, gcs, azure)
+    imageChartStorage:
+      type: filesystem
+      disableredirect: false
+      
+      filesystem:
+        rootdirectory: /storage
+      
+      # S3 configuration (set type: s3 to use)
+      # s3:
+      #   region: us-east-1
+      #   bucket: harbor-registry
+      #   accesskey: ""
+      #   secretkey: ""
+      #   encrypt: true
+      #   secure: true
+      #   v4auth: true
+
+# Ingress
+ingress:
+  enabled: false
+  type: ingress  # or ingressroute for Traefik
+  host: harbor.local
+  
+  # Standard Ingress settings
+  className: ""
+  annotations: {}
+  
+  # Traefik IngressRoute settings
+  entryPoint: web
+  tlsEntryPoint: websecure
+  
+  # Middlewares (for Traefik IngressRoute)
+  createMiddlewares: false
+  httpsRedirect:
+    enabled: false
+  ipWhitelist:
+    enabled: false
+    sourceRange: []
+  
+  # TLS
+  tls:
+    enabled: false
+    secretName: ""
+    certResolver: ""
