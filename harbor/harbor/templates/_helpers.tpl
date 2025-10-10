@@ -32,23 +32,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Database host helper
+Note: Database helper templates are provided by the GoHarbor subchart.
+Do not define them here as they will conflict with the subchart's templates.
+The parent chart's externalDatabase configuration is used to configure
+the harbor.database.external values passed to the subchart.
 */}}
-{{- define "harbor.database.host" -}}
-{{- if .Values.externalDatabase.enabled }}
-{{- .Values.externalDatabase.host }}
-{{- else }}
-{{- printf "%s-postgresql" .Release.Name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Database password helper
-*/}}
-{{- define "harbor.database.password" -}}
-{{- if .Values.externalDatabase.enabled }}
-{{- .Values.externalDatabase.password }}
-{{- else }}
-{{- .Values.global.postgresql.auth.password }}
-{{- end }}
-{{- end }}

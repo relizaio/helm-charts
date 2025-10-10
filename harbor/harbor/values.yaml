@@ -43,13 +43,17 @@ harbor:
       enabled: false
   
   # Database - configured based on externalDatabase.enabled above
+  # IMPORTANT: When using bundled PostgreSQL, you MUST set:
+  #   - external.host to "<release-name>-postgresql"
+  #   - external.password to match global.postgresql.auth.password
+  # Harbor subchart does NOT read from global.postgresql.auth
   database:
     type: external
     external:
-      host: ""  # Set to externalDatabase.host or leave empty for bundled
+      host: ""  # REQUIRED: Set to "<release-name>-postgresql" for bundled DB
       port: "5432"
       username: "postgres"
-      password: ""
+      password: ""  # REQUIRED: Must match global.postgresql.auth.password
       coreDatabase: "registry"
       sslmode: "disable"
   
