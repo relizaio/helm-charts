@@ -2,7 +2,7 @@ apiVersion: v2
 name: harbor
 description: Harbor container registry with PostgreSQL 17 and Traefik ingress
 type: application
-version: 0.0.0
+version: 0.0.1
 appVersion: "2.14.0"
 
 home: https://reliza.io
