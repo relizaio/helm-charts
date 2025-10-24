@@ -3,21 +3,17 @@ name: Push Helm Charts on Change
 on:
   push:
     branches: [main, master]
+    paths:
+      - 'ecr-regcred/**'
+      - 'reliza-cd/**'
+      - 'reliza-watcher/**'
+      - 'reliza-common/**'
+      - 'reliza-postgresql/**'
+      - 'sealed-secrets/**'
+      - 'verdaccio/**'
+      - 'harbor-automated/harbor-helm/**'
 
 jobs:
-  detect-changes:
-    name: Detect Chart Changes
-    runs-on: ubuntu-latest
-    outputs:
-      harbor: ${{ steps.filter.outputs.harbor }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            harbor:
-              - 'harbor-automated/harbor-helm/**'
 
   build-ecr-regcred:
     name: Build ECR REGCRED
@@ -143,8 +139,6 @@ jobs:
           path: verdaccio
 
   build-harbor-automated:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.harbor == 'true'
     permissions:
       contents: write
     name: Build And Push Harbor Automated Helm Chart
