@@ -149,19 +149,6 @@ jobs:
     name: Build And Push Harbor Automated Helm Chart
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.16.2
-      
-      - name: Build Helm dependencies
-        run: |
-          cd harbor-automated/harbor-helm
-          helm dependency build
-      
       - name: RelizaHub Build And Submit Harbor Helm metadata action
         uses: relizaio/reliza-helm-action@c63d479f4fd1fce07a5b13a928afb1a196bb83a1 # v3.8
         with:

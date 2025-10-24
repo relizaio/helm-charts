@@ -70,6 +70,13 @@ jobs:
           echo "Generating Harbor chart..."
           ./bin/harbor-modifier -version=${{ env.HARBOR_VERSION }}
       
+      - name: Build chart dependencies
+        working-directory: harbor-automated
+        run: |
+          echo "Building chart dependencies..."
+          cd harbor-helm
+          helm dependency build
+      
       - name: Validate chart
         working-directory: harbor-automated
         run: |
