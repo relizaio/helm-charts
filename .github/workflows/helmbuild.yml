@@ -12,6 +12,7 @@ on:
       - 'sealed-secrets/**'
       - 'verdaccio/**'
       - 'harbor-automated/harbor-helm/**'
+      - '.github/workflows/helmbuild.yml'
 
 jobs:
 
