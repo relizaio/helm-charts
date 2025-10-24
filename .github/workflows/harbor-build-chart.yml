@@ -31,8 +31,11 @@ jobs:
     name: Build Chart and Commit
     runs-on: ubuntu-latest
     
-    # Only commit on main branch, not PRs
-    if: github.event_name != 'pull_request'
+    # Only commit on main branch, not PRs, and not if triggered by bot
+    if: |
+      github.event_name != 'pull_request' &&
+      github.actor != 'github-actions[bot]' &&
+      !contains(github.event.head_commit.message, 'chore: build Harbor chart')
     
     steps:
       - name: Checkout code
@@ -123,9 +126,7 @@ jobs:
           git commit -m "chore: build Harbor chart ${{ env.HARBOR_VERSION }}-reliza.${{ env.RELIZA_ITERATION }}
 
           Generated from commit: ${{ github.sha }}
-          Harbor version: ${{ env.HARBOR_VERSION }}
-          
-          [skip ci]"
+          Harbor version: ${{ env.HARBOR_VERSION }}"
           
           # Push
           git push origin ${{ github.ref_name }}
