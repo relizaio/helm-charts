@@ -1,0 +1,7 @@
+# Reliza CI generated files - should not be packaged
+get_latest_release_cmd
+get_latest_release_exec
+get_version_command
+get_version_exec
+reliza_command
+rlz_cmd_exec
