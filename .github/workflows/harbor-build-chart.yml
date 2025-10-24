@@ -126,8 +126,9 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           
-          # Add the generated chart
+          # Add the generated chart (force add to include .tgz files in charts/)
           git add harbor-helm/
+          git add -f harbor-helm/charts/*.tgz
           
           # Create commit
           git commit -m "chore: build Harbor chart ${{ env.HARBOR_VERSION }}-reliza.${{ env.RELIZA_ITERATION }}
