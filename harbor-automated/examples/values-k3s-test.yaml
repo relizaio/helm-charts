@@ -1,0 +1,148 @@
+# K3s Local Test Configuration
+# Optimized for local k3s testing with minimal resources
+
+# ==========================================
+# Expose Configuration - Traefik (k3s default)
+# ==========================================
+expose:
+  type: traefik
+  traefik:
+    enabled: true
+    host: harbor.local
+    tls:
+      enabled: false  # Disable TLS for local testing
+    httpsRedirect:
+      enabled: false  # Disable redirect for easier testing
+
+# ==========================================
+# External URL
+# ==========================================
+externalURL: http://harbor.local
+
+# ==========================================
+# Admin Credentials
+# ==========================================
+harborAdminPassword: "Harbor12345"
+
+# ==========================================
+# Database - Reliza PostgreSQL
+# ==========================================
+postgresql:
+  enabled: false
+
+relizaPostgresql:
+  enabled: true
+  auth:
+    username: harbor
+    password: "PostgresTest123"
+    database: registry
+  primary:
+    persistence:
+      enabled: true
+      size: 5Gi  # Smaller for local testing
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+database:
+  type: internal
+
+# ==========================================
+# Storage - Filesystem (smaller PVCs)
+# ==========================================
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 10Gi  # Reduced for local testing
+      storageClass: "local-path"  # k3s default
+    jobservice:
+      size: 2Gi
+      storageClass: "local-path"
+    trivy:
+      size: 2Gi
+      storageClass: "local-path"
+
+# ==========================================
+# Harbor Components - Reduced Resources
+# ==========================================
+core:
+  replicas: 1
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+portal:
+  replicas: 1
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+
+jobservice:
+  replicas: 1
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+registry:
+  replicas: 1
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+# Trivy - vulnerability scanning
+trivy:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# ChartMuseum - Helm chart repository
+chartmuseum:
+  enabled: true
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+
+# Notary - image signing (disabled for testing)
+notary:
+  enabled: false
+
+# ==========================================
+# Additional Configuration
+# ==========================================
+# Metrics
+metrics:
+  enabled: false
+
+# Log level
+logLevel: info

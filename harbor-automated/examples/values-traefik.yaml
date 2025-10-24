@@ -1,0 +1,48 @@
+# Example: Harbor with Traefik IngressRoute
+# This configuration uses Traefik IngressRoute with Let's Encrypt
+
+# Expose configuration
+expose:
+  type: traefik
+  traefik:
+    enabled: true
+    host: harbor.example.com  # Change this to your domain
+    
+    # TLS with Let's Encrypt
+    tls:
+      enabled: true
+      certResolver: le  # Name of your Traefik cert resolver
+      # Or use existing secret:
+      # secretName: harbor-tls
+    
+    # HTTPS redirect
+    httpsRedirect:
+      enabled: true
+    
+    # Optional: Add custom middlewares
+    # middlewares:
+    #   - harbor-ratelimit
+    #   - harbor-auth
+
+# External URL (must match the host above)
+externalURL: https://harbor.example.com
+
+# Admin password
+harborAdminPassword: "Harbor12345"  # Change this!
+
+# Database (using default PostgreSQL)
+postgresql:
+  enabled: true
+  auth:
+    password: "PostgresPassword123"  # Change this!
+
+# Persistence
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 50Gi
+    jobservice:
+      size: 5Gi
+    trivy:
+      size: 5Gi

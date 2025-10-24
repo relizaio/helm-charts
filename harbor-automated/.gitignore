@@ -1,0 +1,15 @@
+# Build artifacts
+bin/
+
+# Packaged charts (CI generates these)
+packages/
+*.tgz
+
+# Temporary files
+*.tmp
+*.log
+*.backup
+*.old
+
+# Note: harbor-helm/ is now committed (built by CI)
+# This ensures declarative GitOps workflow

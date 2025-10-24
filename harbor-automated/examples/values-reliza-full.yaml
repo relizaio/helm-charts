@@ -1,0 +1,194 @@
+# Example: Complete Reliza Harbor Configuration
+# This combines Reliza PostgreSQL, Traefik IngressRoute, and S3 storage
+
+# ==========================================
+# Expose Configuration - Traefik
+# ==========================================
+expose:
+  type: traefik
+  traefik:
+    enabled: true
+    host: harbor.example.com  # Change to your domain
+    tls:
+      enabled: true
+      certResolver: le  # Your Let's Encrypt resolver
+    httpsRedirect:
+      enabled: true
+
+# ==========================================
+# External URL
+# ==========================================
+externalURL: https://harbor.example.com
+
+# ==========================================
+# Admin Credentials
+# ==========================================
+harborAdminPassword: "Harbor12345"  # Change this!
+
+# ==========================================
+# Database - Reliza PostgreSQL
+# ==========================================
+postgresql:
+  enabled: false
+
+relizaPostgresql:
+  enabled: true
+  auth:
+    username: harbor
+    password: "PostgresPassword123"  # Change this!
+    database: registry
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 2000m
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false  # Enable if using Prometheus Operator
+
+database:
+  type: internal
+
+# ==========================================
+# Storage - S3 (Optional)
+# ==========================================
+# Uncomment to use S3 storage instead of PVC
+# persistence:
+#   imageChartStorage:
+#     type: s3
+#     s3:
+#       region: us-east-1
+#       bucket: my-harbor-registry
+#       accesskey: "AWS_ACCESS_KEY_ID"
+#       secretkey: "AWS_SECRET_ACCESS_KEY"
+#       # Optional: Use IAM role instead
+#       # regionendpoint: ""
+#       # encrypt: false
+#       # secure: true
+
+# If using filesystem (default):
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 100Gi
+      storageClass: ""  # Use default
+    jobservice:
+      size: 10Gi
+    trivy:
+      size: 10Gi
+
+# ==========================================
+# Image Digests (Optional)
+# ==========================================
+# Uncomment and fill in to pin images by digest
+# imageDigests:
+#   core:
+#     digest: "sha256:..."
+#   portal:
+#     digest: "sha256:..."
+#   registry:
+#     digest: "sha256:..."
+#   jobservice:
+#     digest: "sha256:..."
+#   registryctl:
+#     digest: "sha256:..."
+#   trivy:
+#     digest: "sha256:..."
+
+# ==========================================
+# Harbor Components Configuration
+# ==========================================
+# Core
+core:
+  replicas: 1
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+# Portal
+portal:
+  replicas: 1
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+# JobService
+jobservice:
+  replicas: 1
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+# Registry
+registry:
+  replicas: 1
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+# Trivy (vulnerability scanning)
+trivy:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+# ChartMuseum (Helm chart repository)
+chartmuseum:
+  enabled: true
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+# Notary (image signing)
+notary:
+  enabled: false
+
+# ==========================================
+# Additional Configuration
+# ==========================================
+# Metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false  # Enable if using Prometheus Operator
+
+# Update strategy
+updateStrategy:
+  type: RollingUpdate
+
+# Log level
+logLevel: info

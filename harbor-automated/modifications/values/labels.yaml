@@ -1,0 +1,18 @@
+# Reliza customization: Label configuration
+# Allows customization of labels when used as subchart
+labels:
+  # Additional labels to add to all resources
+  common: {}
+  # Example:
+  # common:
+  #   team: platform
+  #   environment: production
+  
+  # Override default label values (advanced)
+  overrides: {}
+  # Example:
+  # overrides:
+  #   app.kubernetes.io/name: custom-harbor
+
+# Note: When using as subchart, parent chart labels are automatically inherited
+# These settings allow additional customization if needed

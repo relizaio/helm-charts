@@ -1,0 +1,84 @@
+{{- if and .Values.expose.traefik.enabled (eq .Values.expose.type "traefik") }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "harbor.fullname" . }}-https
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Core Harbor UI and API
+    - match: Host(`{{ .Values.expose.traefik.host }}`)
+      kind: Rule
+      services:
+        - name: {{ include "harbor.fullname" . }}-portal
+          port: 80
+      {{- if .Values.expose.traefik.middlewares }}
+      middlewares:
+        {{- range .Values.expose.traefik.middlewares }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+    
+    # Registry API (v2)
+    - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/v2/`)
+      kind: Rule
+      services:
+        - name: {{ include "harbor.fullname" . }}-registry
+          port: 5000
+      {{- if .Values.expose.traefik.middlewares }}
+      middlewares:
+        {{- range .Values.expose.traefik.middlewares }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+    
+    # Service (for replication and other services)
+    - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/service/`)
+      kind: Rule
+      services:
+        - name: {{ include "harbor.fullname" . }}-core
+          port: 80
+      {{- if .Values.expose.traefik.middlewares }}
+      middlewares:
+        {{- range .Values.expose.traefik.middlewares }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+
+  {{- if .Values.expose.traefik.tls.enabled }}
+  tls:
+    {{- if .Values.expose.traefik.tls.certResolver }}
+    certResolver: {{ .Values.expose.traefik.tls.certResolver }}
+    {{- end }}
+    {{- if .Values.expose.traefik.tls.secretName }}
+    secretName: {{ .Values.expose.traefik.tls.secretName }}
+    {{- end }}
+  {{- end }}
+
+{{- if .Values.expose.traefik.httpsRedirect.enabled }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "harbor.fullname" . }}-http
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ .Values.expose.traefik.host }}`)
+      kind: Rule
+      services:
+        - name: {{ include "harbor.fullname" . }}-portal
+          port: 80
+      middlewares:
+        - name: {{ include "harbor.fullname" . }}-https-redirect
+{{- end }}
+{{- end }}

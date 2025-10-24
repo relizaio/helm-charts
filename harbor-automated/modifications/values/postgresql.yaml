@@ -1,0 +1,24 @@
+# Reliza PostgreSQL Configuration
+# Alternative to the default PostgreSQL subchart
+# Set relizapostgresql.enabled=true and database.type=internal to use this
+relizapostgresql:
+  enabled: false
+  auth:
+    username: harbor
+    password: changeit
+    database: registry
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+  metrics:
+    enabled: false
+  
+  # When enabled, update database.internal.host to use reliza postgresql
+  # The service name will be: {{ .Release.Name }}-relizapostgresql
+
+# Note: To use Reliza PostgreSQL:
+# 1. Set relizapostgresql.enabled=true
+# 2. Set postgresql.enabled=false (disable default PostgreSQL)
+# 3. Ensure database.type=internal
+# 4. The database.internal.host will automatically use the reliza postgresql service

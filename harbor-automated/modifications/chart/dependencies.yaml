@@ -1,0 +1,7 @@
+# Reliza customization: Add reliza-postgresql as optional dependency
+dependencies:
+  - name: postgresql
+    version: ">=0.1.0"
+    repository: oci://registry.relizahub.com/library
+    condition: relizapostgresql.enabled
+    alias: relizapostgresql

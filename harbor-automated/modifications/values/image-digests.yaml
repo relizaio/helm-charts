@@ -1,0 +1,24 @@
+# Reliza customization: Image digest support
+# Add digest field to each component for image:tag@digest format
+imageDigests:
+  core:
+    digest: ""  # e.g., sha256:abc123...
+  portal:
+    digest: ""
+  jobservice:
+    digest: ""
+  registry:
+    digest: ""
+  registryctl:
+    digest: ""
+  trivy:
+    digest: ""
+  notary:
+    server:
+      digest: ""
+    signer:
+      digest: ""
+  chartmuseum:
+    digest: ""
+  exporter:
+    digest: ""

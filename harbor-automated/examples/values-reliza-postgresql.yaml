@@ -1,0 +1,45 @@
+# Example: Harbor with Reliza PostgreSQL
+# This configuration uses Reliza PostgreSQL instead of the default PostgreSQL subchart
+
+# Disable default PostgreSQL
+postgresql:
+  enabled: false
+
+# Enable Reliza PostgreSQL
+relizapostgresql:
+  enabled: true
+  auth:
+    username: harbor
+    password: "ChangeMe123!"  # Change this!
+    database: registry
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: ""  # Use default storage class
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 1Gi
+        cpu: 1000m
+  metrics:
+    enabled: false
+
+# Database configuration
+database:
+  type: internal
+  # The host will be automatically set to: {{ .Release.Name }}-relizapostgresql
+
+# External URL
+externalURL: http://harbor.local
+
+# Admin password
+harborAdminPassword: "Harbor12345"  # Change this!
+
+# Expose configuration (ClusterIP for internal testing)
+expose:
+  type: clusterIP
+  tls:
+    enabled: false
