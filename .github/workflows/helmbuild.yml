@@ -5,6 +5,20 @@ on:
     branches: [main, master]
 
 jobs:
+  detect-changes:
+    name: Detect Chart Changes
+    runs-on: ubuntu-latest
+    outputs:
+      harbor: ${{ steps.filter.outputs.harbor }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            harbor:
+              - 'harbor-automated/harbor-helm/**'
+
   build-ecr-regcred:
     name: Build ECR REGCRED
     runs-on: ubuntu-latest
@@ -129,36 +143,14 @@ jobs:
           path: verdaccio
 
   build-harbor-automated:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.harbor == 'true'
     permissions:
       contents: write
     name: Build And Push Harbor Automated Helm Chart
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      
-      - name: Check if harbor-helm changed
-        id: check_changes
-        run: |
-          # Check if harbor-automated/harbor-helm/ has changes in the last commit
-          if git diff --name-only HEAD~1 HEAD | grep -q '^harbor-automated/harbor-helm/'; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Harbor chart changed, will publish"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "Harbor chart not changed, skipping"
-          fi
-      
-      - name: Skip if no changes
-        if: steps.check_changes.outputs.changed != 'true'
-        run: |
-          echo "No changes detected in harbor-automated/harbor-helm/, skipping job"
-          exit 0
-    
       - name: RelizaHub Build And Submit Harbor Helm metadata action
-        if: steps.check_changes.outputs.changed == 'true'
         uses: relizaio/reliza-helm-action@c63d479f4fd1fce07a5b13a928afb1a196bb83a1 # v3.8
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
