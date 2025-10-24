@@ -57,7 +57,7 @@ lint: setup
 
 ## template: Render templates
 template: setup
-	helm template test ./harbor-helm --set expose.type=clusterIP
+	helm template test ./harbor-helm --set expose.type=clusterIP --set expose.tls.auto.commonName=harbor.local
 
 ## deps: Download Go dependencies
 deps:

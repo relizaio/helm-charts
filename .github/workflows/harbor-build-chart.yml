@@ -74,7 +74,9 @@ jobs:
           helm lint harbor-helm
           
           echo "Testing template rendering..."
-          helm template test harbor-helm --set expose.type=clusterIP > /dev/null
+          helm template test harbor-helm \
+            --set expose.type=clusterIP \
+            --set expose.tls.auto.commonName=harbor.local > /dev/null
           
           echo "Verifying modifications applied..."
           grep -q "Reliza customization" harbor-helm/templates/_helpers.tpl
