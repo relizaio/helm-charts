@@ -11,8 +11,11 @@ on:
       - 'reliza-postgresql/**'
       - 'sealed-secrets/**'
       - 'verdaccio/**'
-      - 'harbor-automated/harbor-helm/**'
       - '.github/workflows/helmbuild.yml'
+  workflow_run:
+    workflows: ["Build Harbor Chart"]
+    types: [completed]
+    branches: [main, master]
 
 jobs:
 
@@ -140,6 +143,7 @@ jobs:
           path: verdaccio
 
   build-harbor-automated:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: write
     name: Build And Push Harbor Automated Helm Chart
