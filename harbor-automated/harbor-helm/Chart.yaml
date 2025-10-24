@@ -22,7 +22,7 @@ maintainers:
       name: Miner Yang
     - email: shengwen.yu@broadcom.com
       name: Shengwen Yu
-name: harbor
+name: harbor-helm
 sources:
     - https://github.com/goharbor/harbor
     - https://github.com/goharbor/harbor-helm
