@@ -26,6 +26,6 @@ name: harbor
 sources:
     - https://github.com/goharbor/harbor
     - https://github.com/goharbor/harbor-helm
-version: 0.1.1
-# Built by CI on 2025-10-24T11:41:35Z
-# Source commit: b59778655d7fdafd84deea6af9b7fd52e190fd40
+version: 1.18.0-reliza.1
+# Built by CI on 2025-10-24T11:48:03Z
+# Source commit: 0430555dc0dc2b7ca19e3945c259d642f5d664ad
