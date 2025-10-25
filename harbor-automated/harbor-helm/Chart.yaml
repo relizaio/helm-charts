@@ -22,10 +22,10 @@ maintainers:
       name: Miner Yang
     - email: shengwen.yu@broadcom.com
       name: Shengwen Yu
-name: harbor-helm
+name: harbor
 sources:
     - https://github.com/goharbor/harbor
     - https://github.com/goharbor/harbor-helm
-version: 0.1.3
-# Built by CI on 2025-10-24T11:53:34Z
-# Source commit: 73abf02c29b49fb2b924a39dfb9c58e0f57f97f0
+version: 1.18.0-reliza.1
+# Built by CI on 2025-10-25T06:55:04Z
+# Source commit: ee5b53d1fd52c21c2fc40e38bc8e4639b4c61b13
