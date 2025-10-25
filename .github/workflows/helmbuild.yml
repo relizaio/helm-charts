@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Verdaccio Helm metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@a4835ccae7c770891d68e96efb493a78565f4d32 # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
