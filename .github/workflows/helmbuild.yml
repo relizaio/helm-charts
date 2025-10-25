@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Common Helm metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Reliza Postgresql Helm metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Sealed Secrets Helm metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Verdaccio Helm metadata action
-        uses: relizaio/reliza-helm-action@e22bc5c2a6b754cc838031f569260c2e655185e2 # v3.10
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
@@ -147,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: RelizaHub Build And Submit Harbor Helm metadata action
-        uses: relizaio/reliza-helm-action@b5a63ee973597ed8bfc808b2780f5fe942bc6838 # v3.9
+        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
