@@ -364,37 +364,40 @@ func updateChart(cfg *Config) error {
 		fmt.Println("    ✅ Updated apiVersion to v2")
 	}
 
-	// Check if dependencies already added
-	if deps, ok := chartData["dependencies"].([]interface{}); ok {
-		for _, dep := range deps {
-			if depMap, ok := dep.(map[string]interface{}); ok {
-				if alias, ok := depMap["alias"].(string); ok && alias == "relizaPostgresql" {
-					fmt.Println("    ⏭️  Dependencies already added, skipping...")
-					return nil
-				}
-			}
-		}
-	}
-
-	// Read dependency modifications
-	depsFile := filepath.Join(cfg.ModificationsDir, "chart", "dependencies.yaml")
-	depsContent, err := os.ReadFile(depsFile)
+	// Read and merge all chart modification files
+	chartModsDir := filepath.Join(cfg.ModificationsDir, "chart")
+	chartModFiles, err := filepath.Glob(filepath.Join(chartModsDir, "*.yaml"))
 	if err != nil {
-		return fmt.Errorf("failed to read dependencies.yaml: %w", err)
+		return fmt.Errorf("failed to glob chart modifications: %w", err)
 	}
 
-	var newDeps map[string]interface{}
-	if err := yaml.Unmarshal(depsContent, &newDeps); err != nil {
-		return fmt.Errorf("failed to parse dependencies.yaml: %w", err)
-	}
-
-	// Merge dependencies
-	if existingDeps, ok := chartData["dependencies"].([]interface{}); ok {
-		if newDepsList, ok := newDeps["dependencies"].([]interface{}); ok {
-			chartData["dependencies"] = append(existingDeps, newDepsList...)
+	for _, modFile := range chartModFiles {
+		modContent, err := os.ReadFile(modFile)
+		if err != nil {
+			return fmt.Errorf("failed to read %s: %w", modFile, err)
 		}
-	} else {
-		chartData["dependencies"] = newDeps["dependencies"]
+
+		var modData map[string]interface{}
+		if err := yaml.Unmarshal(modContent, &modData); err != nil {
+			return fmt.Errorf("failed to parse %s: %w", modFile, err)
+		}
+
+		// Special handling for dependencies - append instead of replace
+		if deps, ok := modData["dependencies"].([]interface{}); ok {
+			if existingDeps, ok := chartData["dependencies"].([]interface{}); ok {
+				chartData["dependencies"] = append(existingDeps, deps...)
+			} else {
+				chartData["dependencies"] = deps
+			}
+			delete(modData, "dependencies") // Don't merge it again below
+		}
+
+		// Merge other fields
+		mergeMaps(chartData, modData)
+	}
+
+	if len(chartModFiles) > 0 {
+		fmt.Printf("    ✅ Applied %d chart modification(s)\n", len(chartModFiles))
 	}
 
 	// Write updated Chart.yaml
