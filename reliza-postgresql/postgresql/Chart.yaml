@@ -36,4 +36,4 @@ maintainers:
 name: postgresql
 sources:
 - https://github.com/relizaio/helm-charts
-version: 0.1.0
+version: 0.1.2
