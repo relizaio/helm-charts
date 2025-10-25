@@ -20,58 +20,55 @@ on:
 jobs:
 
   build-ecr-regcred:
+    permissions:
+      contents: write
     name: Build ECR REGCRED
     runs-on: ubuntu-latest
-    env:
-      HELM_CHART_NAME: ecr-regcred
-      DIR: ecr-regcred
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@2.0
+        uses: relizaio/reliza-helm-action@5b75b200f2383d405861aa69b4cee558e68ede9c # v3.8
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
           registry_host: ${{ secrets.HELM_OCI_REPO }}
-          helm_chart_name: $HELM_CHART_NAME
+          helm_chart_name: ecr-regcred
           reliza_api_id: ${{ secrets.RELIZA_ECR_REGCRED_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_ECR_REGCRED_API_KEY }}
-          path: $DIR
+          path: ecr-regcred
           
   build-reliza-cd:
+    permissions:
+      contents: write
     name: Build RELIZA CD
     runs-on: ubuntu-latest
-    env:
-      HELM_CHART_NAME: reliza-cd
-      DIR: reliza-cd
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@2.0
+        uses: relizaio/reliza-helm-action@5b75b200f2383d405861aa69b4cee558e68ede9c # v3.8
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
           registry_host: ${{ secrets.HELM_OCI_REPO }}
-          helm_chart_name: $HELM_CHART_NAME
+          helm_chart_name: reliza-cd
           reliza_api_id: ${{ secrets.RELIZA_CD_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_CD_API_KEY }}
-          path: $DIR
+          path: reliza-cd
 
   build-reliza-watcher:
+    permissions:
+      contents: write
     name: Build RELIZA WATCHER
     runs-on: ubuntu-latest
-    env:
-      HELM_CHART_NAME: reliza-watcher
-      DIR: reliza-watcher
     steps:
       - name: RelizaHub Build And Submit Release metadata action
-        uses: relizaio/reliza-helm-action@2.0
+        uses: relizaio/reliza-helm-action@5b75b200f2383d405861aa69b4cee558e68ede9c # v3.8
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
           registry_host: ${{ secrets.HELM_OCI_REPO }}
-          helm_chart_name: $HELM_CHART_NAME
+          helm_chart_name: reliza-watcher
           reliza_api_id: ${{ secrets.RELIZA_WATCHER_API_ID }}
           reliza_api_key: ${{ secrets.RELIZA_WATCHER_API_KEY }}
-          path: $DIR
+          path: reliza-watcher
 
 
   build-common-helm:
