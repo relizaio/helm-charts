@@ -1,6 +1,6 @@
 dependencies:
 - name: reliza-common
   repository: oci://registry.relizahub.com/library
-  version: 0.0.1
-digest: sha256:a287876445ae5787d9a99a2b29ebea96da57de0ef3ba763a3f436d843e0ee5e3
-generated: "2025-09-11T23:00:20.86361342+05:30"
+  version: 0.0.3
+digest: sha256:9323570a4fd134e410b8b301bc6a25acee6914f3d92fe0f9059c1546a91c6fe7
+generated: "2025-10-25T17:07:38.765128177+05:30"
