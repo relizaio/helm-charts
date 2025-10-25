@@ -54,3 +54,7 @@ git add modifications/ && git commit -m "feat: add config" && git push
 
 **chart/** - Chart metadata
 - `dependencies.yaml` - Reliza PostgreSQL dependency
+- `name.yaml` - Chart name override (harbor-helm)
+
+**Root files**
+- `.helmignore` - Files to exclude from packaging (CI secrets)

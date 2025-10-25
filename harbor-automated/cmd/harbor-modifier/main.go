@@ -164,6 +164,11 @@ func applyModifications(cfg *Config) error {
 		return fmt.Errorf("failed to update Chart.yaml: %w", err)
 	}
 
+	// 5. Update .helmignore
+	if err := updateHelmignore(cfg); err != nil {
+		return fmt.Errorf("failed to update .helmignore: %w", err)
+	}
+
 	return nil
 }
 
@@ -403,6 +408,51 @@ func updateChart(cfg *Config) error {
 	}
 
 	fmt.Println("    ✅ Chart.yaml updated")
+	return nil
+}
+
+func updateHelmignore(cfg *Config) error {
+	fmt.Println("  → Updating .helmignore...")
+
+	ignoreFile := filepath.Join(cfg.ModificationsDir, ".helmignore")
+	targetFile := filepath.Join(cfg.ChartDir, ".helmignore")
+
+	// Check if modifications .helmignore exists
+	if _, err := os.Stat(ignoreFile); os.IsNotExist(err) {
+		fmt.Println("    ⏭️  No .helmignore modifications, skipping...")
+		return nil
+	}
+
+	// Read modifications .helmignore
+	newContent, err := os.ReadFile(ignoreFile)
+	if err != nil {
+		return fmt.Errorf("failed to read .helmignore: %w", err)
+	}
+
+	// Read existing .helmignore
+	existing, err := os.ReadFile(targetFile)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read existing .helmignore: %w", err)
+	}
+
+	// Check if already modified
+	if strings.Contains(string(existing), "Reliza CI generated files") {
+		fmt.Println("    ⏭️  .helmignore already updated, skipping...")
+		return nil
+	}
+
+	// Append new content
+	f, err := os.OpenFile(targetFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open .helmignore: %w", err)
+	}
+	defer f.Close()
+
+	if _, err := f.WriteString("\n" + string(newContent)); err != nil {
+		return fmt.Errorf("failed to write .helmignore: %w", err)
+	}
+
+	fmt.Println("    ✅ .helmignore updated")
 	return nil
 }
 
