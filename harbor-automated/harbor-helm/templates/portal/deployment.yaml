@@ -61,7 +61,7 @@ spec:
       {{- end }}
       containers:
       - name: portal
-        image: {{ include "harbor.image" .Values.portal.image }}
+        image: {{ .Values.portal.image.repository }}:{{ .Values.portal.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
 {{- if .Values.portal.resources }}
         resources:

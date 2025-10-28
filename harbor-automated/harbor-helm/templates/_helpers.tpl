@@ -661,16 +661,3 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: {{ .component }}
 {{- end }}
 {{- end -}}
-
-{{/*
-Construct the full image reference
-Supports both manual deployment (repository + tag) and reliza-cd (repository with full reference)
-Usage: {{ include "harbor.image" .Values.core.image }}
-*/}}
-{{- define "harbor.image" -}}
-{{- if contains ":" .repository -}}
-{{- .repository -}}
-{{- else -}}
-{{- printf "%s:%s" .repository .tag -}}
-{{- end -}}
-{{- end -}}

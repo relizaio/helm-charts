@@ -64,7 +64,7 @@ spec:
       {{- end }}
       containers:
       - name: core
-        image: {{ include "harbor.image" .Values.core.image }}
+        image: {{ .Values.core.image.repository }}:{{ .Values.core.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.core.startupProbe.enabled }}
         startupProbe:
