@@ -18,6 +18,7 @@ git add modifications/ && git commit -m "feat: change" && git push
 ## What It Does
 
 Customizes official Harbor chart with:
+- **Reliza-CD compatibility** - Smart image references work with tag replacement
 - **Label standardization** - Fixes subchart conflicts
 - **Image digest support** - Pin images by digest
 - **Reliza PostgreSQL** - Alternative database

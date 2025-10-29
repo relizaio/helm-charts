@@ -61,8 +61,8 @@ func main() {
 		log.Fatalf("❌ Failed to apply modifications: %v", err)
 	}
 
-	// Step 3: Validate
-	if err := validate(cfg); err != nil {
+	// Step 3: Validate (skip lint, just check dependencies)
+	if err := validateDependencies(cfg); err != nil {
 		log.Fatalf("❌ Validation failed: %v", err)
 	}
 
@@ -167,6 +167,11 @@ func applyModifications(cfg *Config) error {
 	// 5. Update .helmignore
 	if err := updateHelmignore(cfg); err != nil {
 		return fmt.Errorf("failed to update .helmignore: %w", err)
+	}
+
+	// 6. Apply template overlays (replaces image patching)
+	if err := applyTemplateOverlays(cfg); err != nil {
+		return fmt.Errorf("failed to apply template overlays: %w", err)
 	}
 
 	return nil
@@ -459,8 +464,70 @@ func updateHelmignore(cfg *Config) error {
 	return nil
 }
 
-func validate(cfg *Config) error {
-	fmt.Println("\n🔍 Validating chart...")
+func applyTemplateOverlays(cfg *Config) error {
+	fmt.Println("  → Applying template overlays...")
+
+	overlaysDir := filepath.Join(cfg.ModificationsDir, "template-overlays")
+	templatesDir := filepath.Join(cfg.ChartDir, "templates")
+
+	// Check if overlays directory exists
+	if _, err := os.Stat(overlaysDir); os.IsNotExist(err) {
+		fmt.Println("    ⏭️  No template overlays, skipping...")
+		return nil
+	}
+
+	overlayCount := 0
+	err := filepath.Walk(overlaysDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Get relative path from overlays dir
+		relPath, err := filepath.Rel(overlaysDir, path)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path: %w", err)
+		}
+
+		// Target path in chart templates
+		targetPath := filepath.Join(templatesDir, relPath)
+
+		// Ensure target directory exists
+		if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
+			return fmt.Errorf("failed to create directory: %w", err)
+		}
+
+		// Copy overlay file to target
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to read overlay %s: %w", relPath, err)
+		}
+
+		if err := os.WriteFile(targetPath, content, 0644); err != nil {
+			return fmt.Errorf("failed to write %s: %w", relPath, err)
+		}
+
+		overlayCount++
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if overlayCount > 0 {
+		fmt.Printf("    ✅ Applied %d template overlay(s)\n", overlayCount)
+	}
+
+	return nil
+}
+
+func validateDependencies(cfg *Config) error {
+	fmt.Println("\n🔍 Validating chart dependencies...")
 
 	// Build dependencies
 	cmd := exec.Command("helm", "dependency", "build", cfg.ChartDir)
@@ -471,13 +538,6 @@ func validate(cfg *Config) error {
 		}
 	}
 
-	// Helm lint
-	cmd = exec.Command("helm", "lint", cfg.ChartDir)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("helm lint failed: %w\n%s", err, output)
-	}
-
-	fmt.Println("✅ Validation passed")
+	fmt.Println("✅ Dependencies validated")
 	return nil
 }

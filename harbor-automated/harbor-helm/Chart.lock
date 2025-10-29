@@ -3,4 +3,4 @@ dependencies:
   repository: oci://registry.relizahub.com/library
   version: 0.1.2
 digest: sha256:024f619aad916cdbbbfadc6f43e6577e262d55a15103fd25d388d1f2b45653a3
-generated: "2025-10-25T11:41:45.698985412Z"
+generated: "2025-10-29T08:27:41.524530714+05:30"
