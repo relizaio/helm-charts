@@ -51,7 +51,6 @@ git add modifications/ && git commit -m "feat: add config" && git push
 **template-overlays/** - Complete template replacements (reliza-cd compatible)
 - `core/core-dpl.yaml` - Core deployment with inline image conditional
 - `core/core-pre-upgrade-job.yaml` - Pre-upgrade job with inline conditional
-- `database/database-ss.yaml` - Database statefulset (2 images)
 - `exporter/exporter-dpl.yaml` - Metrics exporter
 - `jobservice/jobservice-dpl.yaml` - Job service
 - `nginx/deployment.yaml` - Nginx proxy
@@ -60,14 +59,16 @@ git add modifications/ && git commit -m "feat: add config" && git push
 - `registry/registry-dpl.yaml` - Registry and controller (2 images)
 - `trivy/trivy-sts.yaml` - Trivy scanner
 
+Note: Harbor's internal database templates (database-ss.yaml, database-svc.yaml, database-secret.yaml) 
+are NOT included - they've been completely removed in favor of relizapostgresql subchart.
+
 **helpers/** - Template helpers
 - `chart.tpl` - Chart label
 - `labels.tpl` - Standard labels
 - `image-ref.tpl` - Smart image reference (reliza-cd compatible)
-- `image-reference.tpl` - Legacy image digest support (unused)
 
 **templates/** - Custom resources
-- `traefik-ingressroute.yaml` - Traefik routing
+- `traefik-ingressroute.yaml` - Traefik routing with priorities (API, chartrepo, registry, service, UI)
 - `traefik-middleware.yaml` - HTTPS redirect
 
 **values/** - Configuration

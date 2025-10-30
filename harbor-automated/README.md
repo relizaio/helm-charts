@@ -71,7 +71,8 @@ git add && git commit -m "chore: upgrade" && git push
 ## Documentation
 
 - **README.md** (this file) - Quick reference
-- **GUIDE.md** - Complete guide (CI/CD, modifications, troubleshooting)
+- **examples/README.md** - Configuration examples and patterns
+- **modifications/README.md** - Modifications structure
 
 ## Commands
 

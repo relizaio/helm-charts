@@ -14,6 +14,10 @@ expose:
       certResolver: le  # Your Let's Encrypt resolver
     httpsRedirect:
       enabled: true
+  tls:
+    enabled: true
+    auto:
+      commonName: harbor.example.com  # Required for TLS certificate generation
 
 # ==========================================
 # External URL
@@ -28,9 +32,6 @@ harborAdminPassword: "Harbor12345"  # Change this!
 # ==========================================
 # Database - Reliza PostgreSQL
 # ==========================================
-postgresql:
-  enabled: false
-
 relizaPostgresql:
   enabled: true
   auth:
@@ -55,6 +56,8 @@ relizaPostgresql:
 
 database:
   type: internal
+  # Connection details (host, username, password, database) are automatically
+  # configured from relizapostgresql.auth.* values above
 
 # ==========================================
 # Storage - S3 (Optional)

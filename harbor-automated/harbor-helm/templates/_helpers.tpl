@@ -103,7 +103,7 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.username" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- printf "%s" "postgres" -}}
+    {{- .Values.relizapostgresql.auth.username -}}
   {{- else -}}
     {{- .Values.database.external.username -}}
   {{- end -}}
@@ -111,12 +111,7 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.rawPassword" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace (include "harbor.database" .) -}}
-    {{- if and (not (empty $existingSecret)) (hasKey $existingSecret.data "POSTGRES_PASSWORD") -}}
-      {{- .Values.database.internal.password | default (index $existingSecret.data "POSTGRES_PASSWORD" | b64dec) -}}
-    {{- else -}}
-      {{- .Values.database.internal.password -}}
-    {{- end -}}
+    {{- .Values.relizapostgresql.auth.password -}}
   {{- else -}}
     {{- .Values.database.external.password -}}
   {{- end -}}
@@ -132,7 +127,7 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.coreDatabase" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- printf "%s" "registry" -}}
+    {{- .Values.relizapostgresql.auth.database -}}
   {{- else -}}
     {{- .Values.database.external.coreDatabase -}}
   {{- end -}}
@@ -294,7 +289,7 @@ app: "{{ template "harbor.name" . }}"
 {{- end -}}
 
 {{- define "harbor.database" -}}
-  {{- printf "%s-database" (include "harbor.fullname" .) -}}
+  {{- printf "%s-relizapostgresql" (include "harbor.fullname" .) -}}
 {{- end -}}
 
 {{- define "harbor.trivy" -}}
@@ -630,23 +625,6 @@ With digest: {{ include "harbor.imageRef" (dict "repository" .Values.core.image.
   {{/* Standard format: build from repository + tag + optional digest */}}
   {{- $repo -}}:{{- $tag -}}
   {{- if $digest -}}@{{- $digest -}}{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Reliza customization: Generate image reference with optional digest support
-Usage: {{ include "harbor.imageReference" (dict "imageRoot" .Values.core.image "digest" .Values.imageDigests.core.digest "context" $) }}
-*/}}
-{{- define "harbor.imageReference" -}}
-{{- $imageRoot := .imageRoot -}}
-{{- $digest := .digest -}}
-{{- $registry := $imageRoot.registry | default .context.Values.global.registry -}}
-{{- $repository := $imageRoot.repository -}}
-{{- $tag := $imageRoot.tag | default .context.Chart.AppVersion -}}
-{{- if $registry -}}
-{{ $registry }}/{{ $repository }}:{{ $tag }}{{- if $digest -}}@{{ $digest }}{{- end -}}
-{{- else -}}
-{{ $repository }}:{{ $tag }}{{- if $digest -}}@{{ $digest }}{{- end -}}
 {{- end -}}
 {{- end -}}
 

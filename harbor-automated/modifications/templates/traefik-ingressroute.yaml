@@ -11,11 +11,26 @@ spec:
   entryPoints:
     - websecure
   routes:
-    # Core Harbor UI and API
-    - match: Host(`{{ .Values.expose.traefik.host }}`)
+    # API routes (highest priority - most specific)
+    - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/api/`)
       kind: Rule
+      priority: 30
       services:
-        - name: {{ include "harbor.fullname" . }}-portal
+        - name: {{ include "harbor.fullname" . }}-core
+          port: 80
+      {{- if .Values.expose.traefik.middlewares }}
+      middlewares:
+        {{- range .Values.expose.traefik.middlewares }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+    
+    # Chart repository API
+    - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/chartrepo/`)
+      kind: Rule
+      priority: 25
+      services:
+        - name: {{ include "harbor.fullname" . }}-core
           port: 80
       {{- if .Values.expose.traefik.middlewares }}
       middlewares:
@@ -27,6 +42,7 @@ spec:
     # Registry API (v2)
     - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/v2/`)
       kind: Rule
+      priority: 20
       services:
         - name: {{ include "harbor.fullname" . }}-registry
           port: 5000
@@ -37,11 +53,26 @@ spec:
         {{- end }}
       {{- end }}
     
-    # Service (for replication and other services)
+    # Service endpoints (for replication and webhooks)
     - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/service/`)
       kind: Rule
+      priority: 15
       services:
         - name: {{ include "harbor.fullname" . }}-core
+          port: 80
+      {{- if .Values.expose.traefik.middlewares }}
+      middlewares:
+        {{- range .Values.expose.traefik.middlewares }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+    
+    # Core Harbor UI (lowest priority - catch-all)
+    - match: Host(`{{ .Values.expose.traefik.host }}`)
+      kind: Rule
+      priority: 10
+      services:
+        - name: {{ include "harbor.fullname" . }}-portal
           port: 80
       {{- if .Values.expose.traefik.middlewares }}
       middlewares:

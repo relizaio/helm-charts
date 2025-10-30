@@ -21,10 +21,10 @@ const (
 )
 
 type Config struct {
-	Version         string
-	RepoName        string
-	ProjectDir      string
-	ChartDir        string
+	Version          string
+	RepoName         string
+	ProjectDir       string
+	ChartDir         string
 	ModificationsDir string
 }
 
@@ -34,10 +34,10 @@ func main() {
 	flag.Parse()
 
 	cfg := &Config{
-		Version:         *version,
-		RepoName:        defaultRepo,
-		ProjectDir:      mustGetwd(),
-		ChartDir:        filepath.Join(mustGetwd(), "harbor-helm"),
+		Version:          *version,
+		RepoName:         defaultRepo,
+		ProjectDir:       mustGetwd(),
+		ChartDir:         filepath.Join(mustGetwd(), "harbor-helm"),
 		ModificationsDir: filepath.Join(mustGetwd(), "modifications"),
 	}
 
@@ -149,6 +149,21 @@ func applyModifications(cfg *Config) error {
 		return fmt.Errorf("failed to apply helpers: %w", err)
 	}
 
+	// 1.5. Patch database templates for relizapostgresql support
+	if err := patchDatabaseTemplates(cfg); err != nil {
+		return fmt.Errorf("failed to patch database templates: %w", err)
+	}
+
+	// 1.55. Remove redundant harbor.relizapostgresql template (harbor.database now points to it)
+	if err := removeRelizaPostgresqlTemplate(cfg); err != nil {
+		return fmt.Errorf("failed to remove harbor.relizapostgresql template: %w", err)
+	}
+
+	// 1.6. Remove harbor-db templates (replaced by relizapostgresql)
+	if err := removeHarborDatabase(cfg); err != nil {
+		return fmt.Errorf("failed to remove harbor-db templates: %w", err)
+	}
+
 	// 2. Apply templates
 	if err := applyTemplates(cfg); err != nil {
 		return fmt.Errorf("failed to apply templates: %w", err)
@@ -157,6 +172,11 @@ func applyModifications(cfg *Config) error {
 	// 3. Merge values
 	if err := mergeValues(cfg); err != nil {
 		return fmt.Errorf("failed to merge values: %w", err)
+	}
+
+	// 3.5. Clean up obsolete database.internal section
+	if err := cleanupDatabaseInternal(cfg); err != nil {
+		return fmt.Errorf("failed to cleanup database.internal: %w", err)
 	}
 
 	// 4. Update Chart.yaml
@@ -183,18 +203,6 @@ func applyHelpers(cfg *Config) error {
 	helpersDir := filepath.Join(cfg.ModificationsDir, "helpers")
 	targetFile := filepath.Join(cfg.ChartDir, "templates", "_helpers.tpl")
 
-	// Read existing helpers
-	existing, err := os.ReadFile(targetFile)
-	if err != nil {
-		return fmt.Errorf("failed to read _helpers.tpl: %w", err)
-	}
-
-	// Check if already modified
-	if strings.Contains(string(existing), "Reliza customization") {
-		fmt.Println("    ⏭️  Helpers already added, skipping...")
-		return nil
-	}
-
 	// Append all helper files
 	helpers, err := filepath.Glob(filepath.Join(helpersDir, "*.tpl"))
 	if err != nil {
@@ -218,6 +226,160 @@ func applyHelpers(cfg *Config) error {
 	}
 
 	fmt.Println("    ✅ Helper templates added")
+	return nil
+}
+
+func removeHarborDatabase(cfg *Config) error {
+	fmt.Println("  → Removing harbor-db templates...")
+
+	databaseDir := filepath.Join(cfg.ChartDir, "templates", "database")
+
+	// Files to remove (harbor's internal database, replaced by relizapostgresql)
+	filesToRemove := []string{
+		"database-ss.yaml",
+		"database-svc.yaml",
+		"database-secret.yaml",
+	}
+
+	for _, file := range filesToRemove {
+		path := filepath.Join(databaseDir, file)
+		if err := os.Remove(path); err != nil {
+			if os.IsNotExist(err) {
+				continue // Already removed
+			}
+			return fmt.Errorf("failed to remove %s: %w", file, err)
+		}
+	}
+
+	fmt.Println("    ✅ Harbor-db templates removed")
+	return nil
+}
+
+func patchDatabaseTemplates(cfg *Config) error {
+	fmt.Println("  → Patching database templates for relizapostgresql...")
+
+	targetFile := filepath.Join(cfg.ChartDir, "templates", "_helpers.tpl")
+
+	content, err := os.ReadFile(targetFile)
+	if err != nil {
+		return fmt.Errorf("failed to read _helpers.tpl: %w", err)
+	}
+
+	newContent := string(content)
+
+	// 1. Replace harbor.database definition to point to relizapostgresql service
+	oldDatabase := `{{- define "harbor.database" -}}
+  {{- printf "%s-database" (include "harbor.fullname" .) -}}
+{{- end -}}`
+
+	newDatabase := `{{- define "harbor.database" -}}
+  {{- printf "%s-relizapostgresql" (include "harbor.fullname" .) -}}
+{{- end -}}`
+
+	newContent = strings.Replace(newContent, oldDatabase, newDatabase, 1)
+
+	// 2. Update harbor.database.username to use relizapostgresql.auth.username
+	oldUsername := `{{- define "harbor.database.username" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- printf "%s" "postgres" -}}
+  {{- else -}}
+    {{- .Values.database.external.username -}}
+  {{- end -}}
+{{- end -}}`
+
+	newUsername := `{{- define "harbor.database.username" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- .Values.relizapostgresql.auth.username -}}
+  {{- else -}}
+    {{- .Values.database.external.username -}}
+  {{- end -}}
+{{- end -}}`
+
+	newContent = strings.Replace(newContent, oldUsername, newUsername, 1)
+
+	// 3. Update harbor.database.rawPassword to use relizapostgresql.auth.password (remove secret lookup)
+	oldPassword := `{{- define "harbor.database.rawPassword" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace (include "harbor.database" .) -}}
+    {{- if and (not (empty $existingSecret)) (hasKey $existingSecret.data "POSTGRES_PASSWORD") -}}
+      {{- .Values.database.internal.password | default (index $existingSecret.data "POSTGRES_PASSWORD" | b64dec) -}}
+    {{- else -}}
+      {{- .Values.database.internal.password -}}
+    {{- end -}}
+  {{- else -}}
+    {{- .Values.database.external.password -}}
+  {{- end -}}
+{{- end -}}`
+
+	newPassword := `{{- define "harbor.database.rawPassword" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- .Values.relizapostgresql.auth.password -}}
+  {{- else -}}
+    {{- .Values.database.external.password -}}
+  {{- end -}}
+{{- end -}}`
+
+	newContent = strings.Replace(newContent, oldPassword, newPassword, 1)
+
+	// 4. Update harbor.database.coreDatabase to use relizapostgresql.auth.database
+	oldCoreDatabase := `{{- define "harbor.database.coreDatabase" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- printf "%s" "registry" -}}
+  {{- else -}}
+    {{- .Values.database.external.coreDatabase -}}
+  {{- end -}}
+{{- end -}}`
+
+	newCoreDatabase := `{{- define "harbor.database.coreDatabase" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- .Values.relizapostgresql.auth.database -}}
+  {{- else -}}
+    {{- .Values.database.external.coreDatabase -}}
+  {{- end -}}
+{{- end -}}`
+
+	newContent = strings.Replace(newContent, oldCoreDatabase, newCoreDatabase, 1)
+
+	if err := os.WriteFile(targetFile, []byte(newContent), 0644); err != nil {
+		return fmt.Errorf("failed to write patched _helpers.tpl: %w", err)
+	}
+
+	fmt.Println("    ✅ Database templates patched (4 templates updated)")
+	return nil
+}
+
+func removeRelizaPostgresqlTemplate(cfg *Config) error {
+	fmt.Println("  → Removing redundant harbor.relizapostgresql template...")
+
+	targetFile := filepath.Join(cfg.ChartDir, "templates", "_helpers.tpl")
+
+	content, err := os.ReadFile(targetFile)
+	if err != nil {
+		return fmt.Errorf("failed to read _helpers.tpl: %w", err)
+	}
+
+	// Remove the harbor.relizapostgresql template definition (added by applyHelpers)
+	templateToRemove := `{{/*
+Reliza PostgreSQL service name
+Returns the service name for relizapostgresql when enabled
+*/}}
+{{- define "harbor.relizapostgresql" -}}
+  {{- printf "%s-relizapostgresql" (include "harbor.fullname" .) -}}
+{{- end -}}
+`
+
+	newContent := strings.Replace(string(content), templateToRemove, "", 1)
+
+	if newContent == string(content) {
+		fmt.Println("    ⏭️  harbor.relizapostgresql template not found (already removed or not added)")
+		return nil
+	}
+
+	if err := os.WriteFile(targetFile, []byte(newContent), 0644); err != nil {
+		return fmt.Errorf("failed to write _helpers.tpl: %w", err)
+	}
+
+	fmt.Println("    ✅ Redundant template removed")
 	return nil
 }
 
@@ -304,8 +466,8 @@ func mergeValues(cfg *Config) error {
 	if expose, ok := existingValues["expose"].(map[string]interface{}); ok {
 		if _, ok := expose["traefik"]; !ok {
 			expose["traefik"] = map[string]interface{}{
-				"enabled": false,
-				"host":    "harbor.example.com",
+				"enabled":     false,
+				"host":        "harbor.example.com",
 				"middlewares": []interface{}{},
 				"tls": map[string]interface{}{
 					"enabled":      true,
@@ -330,6 +492,45 @@ func mergeValues(cfg *Config) error {
 	}
 
 	fmt.Println("    ✅ Values merged")
+	return nil
+}
+
+func cleanupDatabaseInternal(cfg *Config) error {
+	fmt.Println("  → Cleaning up obsolete database.internal section...")
+
+	targetFile := filepath.Join(cfg.ChartDir, "values.yaml")
+
+	// Read values
+	content, err := os.ReadFile(targetFile)
+	if err != nil {
+		return fmt.Errorf("failed to read values.yaml: %w", err)
+	}
+
+	var values map[string]interface{}
+	if err := yaml.Unmarshal(content, &values); err != nil {
+		return fmt.Errorf("failed to parse values.yaml: %w", err)
+	}
+
+	// Remove database.internal section
+	if database, ok := values["database"].(map[string]interface{}); ok {
+		if _, exists := database["internal"]; exists {
+			delete(database, "internal")
+			fmt.Println("    ✅ Removed database.internal section")
+		} else {
+			fmt.Println("    ⏭️  database.internal not found (already removed)")
+		}
+	}
+
+	// Write updated values
+	updated, err := yaml.Marshal(values)
+	if err != nil {
+		return fmt.Errorf("failed to marshal values: %w", err)
+	}
+
+	if err := os.WriteFile(targetFile, updated, 0644); err != nil {
+		return fmt.Errorf("failed to write values.yaml: %w", err)
+	}
+
 	return nil
 }
 
@@ -437,19 +638,7 @@ func updateHelmignore(cfg *Config) error {
 		return fmt.Errorf("failed to read .helmignore: %w", err)
 	}
 
-	// Read existing .helmignore
-	existing, err := os.ReadFile(targetFile)
-	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to read existing .helmignore: %w", err)
-	}
-
-	// Check if already modified
-	if strings.Contains(string(existing), "Reliza CI generated files") {
-		fmt.Println("    ⏭️  .helmignore already updated, skipping...")
-		return nil
-	}
-
-	// Append new content
+	// Append new content to chart's .helmignore
 	f, err := os.OpenFile(targetFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open .helmignore: %w", err)

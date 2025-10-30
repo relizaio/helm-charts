@@ -1,11 +1,7 @@
 # Example: Harbor with Reliza PostgreSQL
-# This configuration uses Reliza PostgreSQL instead of the default PostgreSQL subchart
+# This configuration uses Reliza PostgreSQL for the database
 
-# Disable default PostgreSQL
-postgresql:
-  enabled: false
-
-# Enable Reliza PostgreSQL
+# Reliza PostgreSQL Configuration
 relizapostgresql:
   enabled: true
   auth:
@@ -30,7 +26,8 @@ relizapostgresql:
 # Database configuration
 database:
   type: internal
-  # The host will be automatically set to: {{ .Release.Name }}-relizapostgresql
+  # Connection details (host, username, password, database) are automatically
+  # configured from relizapostgresql.auth.* values above
 
 # External URL
 externalURL: http://harbor.local

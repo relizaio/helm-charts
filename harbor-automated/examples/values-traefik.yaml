@@ -18,6 +18,12 @@ expose:
     # HTTPS redirect
     httpsRedirect:
       enabled: true
+  
+  # TLS configuration
+  tls:
+    enabled: true
+    auto:
+      commonName: harbor.example.com  # Required for TLS certificate generation
     
     # Optional: Add custom middlewares
     # middlewares:
@@ -30,11 +36,22 @@ externalURL: https://harbor.example.com
 # Admin password
 harborAdminPassword: "Harbor12345"  # Change this!
 
-# Database (using default PostgreSQL)
-postgresql:
+# Database - Reliza PostgreSQL
+relizapostgresql:
   enabled: true
   auth:
+    username: harbor
     password: "PostgresPassword123"  # Change this!
+    database: registry
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+
+database:
+  type: internal
+  # Connection details (host, username, password, database) are automatically
+  # configured from relizapostgresql.auth.* values above
 
 # Persistence
 persistence:

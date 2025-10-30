@@ -55,27 +55,6 @@ database:
         port: "5432"
         sslmode: disable
         username: user
-    internal:
-        affinity: {}
-        automountServiceAccountToken: false
-        extrInitContainers: []
-        extraEnvVars: []
-        image:
-            repository: goharbor/harbor-db
-            tag: v2.14.0
-        initContainer:
-            migrator: {}
-            permissions: {}
-        livenessProbe:
-            timeoutSeconds: 1
-        nodeSelector: {}
-        password: changeit
-        priorityClassName: null
-        readinessProbe:
-            timeoutSeconds: 1
-        serviceAccountName: ""
-        shmSizeLimit: 512Mi
-        tolerations: []
     maxIdleConns: 100
     maxOpenConns: 900
     podAnnotations: {}
@@ -473,7 +452,7 @@ relizapostgresql:
         database: registry
         password: changeit
         username: harbor
-    enabled: false
+    enabled: true
     metrics:
         enabled: false
     primary:

@@ -1,8 +1,8 @@
 # Reliza PostgreSQL Configuration
-# Alternative to the default PostgreSQL subchart
-# Set relizapostgresql.enabled=true and database.type=internal to use this
+# This is the ONLY internal database for Harbor (harbor-db removed)
+# Production-ready PostgreSQL with full configurability
 relizapostgresql:
-  enabled: false
+  enabled: true  # DEFAULT - disable only when using external database
   auth:
     username: harbor
     password: changeit
@@ -13,12 +13,19 @@ relizapostgresql:
       size: 8Gi
   metrics:
     enabled: false
-  
-  # When enabled, update database.internal.host to use reliza postgresql
-  # The service name will be: {{ .Release.Name }}-relizapostgresql
 
-# Note: To use Reliza PostgreSQL:
-# 1. Set relizapostgresql.enabled=true
-# 2. Set postgresql.enabled=false (disable default PostgreSQL)
-# 3. Ensure database.type=internal
-# 4. The database.internal.host will automatically use the reliza postgresql service
+# Database Configuration
+# Two modes:
+#
+# 1. Internal Database (DEFAULT):
+#    database.type: internal
+#    - Uses relizapostgresql subchart
+#    - Harbor connects to {{ .Release.Name }}-relizapostgresql service
+#    - Configure via relizapostgresql.* settings above
+#
+# 2. External Database (for migration or managed DB):
+#    database.type: external
+#    database.external.host: "your-db-host"
+#    relizapostgresql.enabled: false  # Don't forget to disable!
+#    - Harbor connects to your external database
+#    - No database pod created

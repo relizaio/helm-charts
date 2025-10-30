@@ -13,6 +13,8 @@ expose:
       enabled: false  # Disable TLS for local testing
     httpsRedirect:
       enabled: false  # Disable redirect for easier testing
+  tls:
+    enabled: false  # Disable TLS for local testing
 
 # ==========================================
 # External URL
@@ -27,9 +29,6 @@ harborAdminPassword: "Harbor12345"
 # ==========================================
 # Database - Reliza PostgreSQL
 # ==========================================
-postgresql:
-  enabled: false
-
 relizaPostgresql:
   enabled: true
   auth:
@@ -50,6 +49,8 @@ relizaPostgresql:
 
 database:
   type: internal
+  # Connection details (host, username, password, database) are automatically
+  # configured from relizapostgresql.auth.* values above
 
 # ==========================================
 # Storage - Filesystem (smaller PVCs)
