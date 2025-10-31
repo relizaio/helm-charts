@@ -159,6 +159,11 @@ func applyModifications(cfg *Config) error {
 		return fmt.Errorf("failed to remove harbor.relizapostgresql template: %w", err)
 	}
 
+	// 1.56. Patch harbor.autoGenCertForNginx to exclude Traefik
+	if err := patchAutoGenCertForNginx(cfg); err != nil {
+		return fmt.Errorf("failed to patch harbor.autoGenCertForNginx: %w", err)
+	}
+
 	// 1.6. Remove harbor-db templates (replaced by relizapostgresql)
 	if err := removeHarborDatabase(cfg); err != nil {
 		return fmt.Errorf("failed to remove harbor-db templates: %w", err)
@@ -380,6 +385,48 @@ Returns the service name for relizapostgresql when enabled
 	}
 
 	fmt.Println("    ✅ Redundant template removed")
+	return nil
+}
+
+func patchAutoGenCertForNginx(cfg *Config) error {
+	fmt.Println("  → Patching harbor.autoGenCertForNginx to exclude Traefik...")
+
+	targetFile := filepath.Join(cfg.ChartDir, "templates", "_helpers.tpl")
+
+	content, err := os.ReadFile(targetFile)
+	if err != nil {
+		return fmt.Errorf("failed to read _helpers.tpl: %w", err)
+	}
+
+	// Replace the original harbor.autoGenCertForNginx template
+	oldTemplate := `{{- define "harbor.autoGenCertForNginx" -}}
+  {{- if and (eq (include "harbor.autoGenCert" .) "true") (ne .Values.expose.type "ingress") -}}
+    {{- printf "true" -}}
+  {{- else -}}
+    {{- printf "false" -}}
+  {{- end -}}
+{{- end -}}`
+
+	newTemplate := `{{- define "harbor.autoGenCertForNginx" -}}
+  {{- if and (eq (include "harbor.autoGenCert" .) "true") (ne .Values.expose.type "ingress") (ne .Values.expose.type "traefik") -}}
+    {{- printf "true" -}}
+  {{- else -}}
+    {{- printf "false" -}}
+  {{- end -}}
+{{- end -}}`
+
+	newContent := strings.Replace(string(content), oldTemplate, newTemplate, 1)
+
+	if newContent == string(content) {
+		fmt.Println("    ⏭️  harbor.autoGenCertForNginx template not found or already patched")
+		return nil
+	}
+
+	if err := os.WriteFile(targetFile, []byte(newContent), 0644); err != nil {
+		return fmt.Errorf("failed to write _helpers.tpl: %w", err)
+	}
+
+	fmt.Println("    ✅ harbor.autoGenCertForNginx patched to exclude Traefik")
 	return nil
 }
 

@@ -22,8 +22,8 @@ expose:
   # TLS configuration
   tls:
     enabled: true
-    auto:
-      commonName: harbor.example.com  # Required for TLS certificate generation
+    # Note: expose.tls.auto.commonName is NOT required when using Traefik
+    # Traefik handles TLS termination, not nginx
     
     # Optional: Add custom middlewares
     # middlewares:

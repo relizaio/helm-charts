@@ -78,7 +78,7 @@ app: "{{ template "harbor.name" . }}"
 {{- end -}}
 
 {{- define "harbor.autoGenCertForNginx" -}}
-  {{- if and (eq (include "harbor.autoGenCert" .) "true") (ne .Values.expose.type "ingress") -}}
+  {{- if and (eq (include "harbor.autoGenCert" .) "true") (ne .Values.expose.type "ingress") (ne .Values.expose.type "traefik") -}}
     {{- printf "true" -}}
   {{- else -}}
     {{- printf "false" -}}
