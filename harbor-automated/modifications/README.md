@@ -67,7 +67,10 @@ are NOT included - they've been completely removed in favor of relizapostgresql 
 - `labels.tpl` - Standard labels
 - `image-ref.tpl` - Smart image reference (reliza-cd compatible)
 
-Note: `harbor.autoGenCertForNginx` is patched in main.go to exclude Traefik type (TLS handled by Traefik, not nginx)
+**Template Patches (applied by main.go):**
+- `harbor.autoGenCertForNginx` - Patched to exclude Traefik type (TLS handled by Traefik, not nginx)
+- `registry-cm.yaml` - Patched to use token auth when TLS enabled (fixes robot account authentication)
+- `registry-dpl.yaml` - Patched to mount token certificate when TLS enabled (required for token auth)
 
 **templates/** - Custom resources
 - `traefik-ingressroute.yaml` - Traefik routing with priorities (API, chartrepo, registry, service, UI)

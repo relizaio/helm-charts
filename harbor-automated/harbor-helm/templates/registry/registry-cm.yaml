@@ -208,9 +208,17 @@ data:
         addr: localhost:5001
       {{- end }}
     auth:
+      {{- if .Values.expose.tls.enabled }}
+      token:
+        realm: {{ .Values.externalURL }}/service/token
+        service: harbor-registry
+        issuer: harbor-token-issuer
+        rootcertbundle: /etc/registry/root.crt
+      {{- else }}
       htpasswd:
         realm: harbor-registry-basic-realm
         path: /etc/registry/passwd
+      {{- end }}
     validation:
       disabled: true
     compatibility:

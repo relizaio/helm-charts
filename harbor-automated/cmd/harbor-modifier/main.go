@@ -164,6 +164,11 @@ func applyModifications(cfg *Config) error {
 		return fmt.Errorf("failed to patch harbor.autoGenCertForNginx: %w", err)
 	}
 
+	// 1.57. Patch registry templates for token authentication
+	if err := patchRegistryTemplates(cfg); err != nil {
+		return fmt.Errorf("failed to patch registry templates: %w", err)
+	}
+
 	// 1.6. Remove harbor-db templates (replaced by relizapostgresql)
 	if err := removeHarborDatabase(cfg); err != nil {
 		return fmt.Errorf("failed to remove harbor-db templates: %w", err)
@@ -427,6 +432,102 @@ func patchAutoGenCertForNginx(cfg *Config) error {
 	}
 
 	fmt.Println("    ✅ harbor.autoGenCertForNginx patched to exclude Traefik")
+	return nil
+}
+
+func patchRegistryTemplates(cfg *Config) error {
+	fmt.Println("  → Patching registry templates for token authentication...")
+
+	patchCount := 0
+
+	// 1. Patch registry configmap to use token auth when TLS is enabled
+	registryCmPath := filepath.Join(cfg.ChartDir, "templates", "registry", "registry-cm.yaml")
+	content, err := os.ReadFile(registryCmPath)
+	if err != nil {
+		return fmt.Errorf("failed to read registry-cm.yaml: %w", err)
+	}
+
+	oldAuth := `    auth:
+      htpasswd:
+        realm: harbor-registry-basic-realm
+        path: /etc/registry/passwd`
+
+	newAuth := `    auth:
+      {{- if .Values.expose.tls.enabled }}
+      token:
+        realm: {{ .Values.externalURL }}/service/token
+        service: harbor-registry
+        issuer: harbor-token-issuer
+        rootcertbundle: /etc/registry/root.crt
+      {{- else }}
+      htpasswd:
+        realm: harbor-registry-basic-realm
+        path: /etc/registry/passwd
+      {{- end }}`
+
+	newContent := strings.Replace(string(content), oldAuth, newAuth, 1)
+	if newContent != string(content) {
+		if err := os.WriteFile(registryCmPath, []byte(newContent), 0644); err != nil {
+			return fmt.Errorf("failed to write registry-cm.yaml: %w", err)
+		}
+		patchCount++
+	}
+
+	// 2. Add token certificate volume mount to registry deployment
+	registryDplPath := filepath.Join(cfg.ChartDir, "templates", "registry", "registry-dpl.yaml")
+	content, err = os.ReadFile(registryDplPath)
+	if err != nil {
+		return fmt.Errorf("failed to read registry-dpl.yaml: %w", err)
+	}
+
+	// Add volume mount after registry-config mount
+	oldVolumeMount := `        - name: registry-config
+          mountPath: /etc/registry/config.yml
+          subPath: config.yml`
+
+	newVolumeMount := `        - name: registry-config
+          mountPath: /etc/registry/config.yml
+          subPath: config.yml
+        {{- if .Values.expose.tls.enabled }}
+        - name: token-cert
+          mountPath: /etc/registry/root.crt
+          subPath: tls.crt
+        {{- end }}`
+
+	newContent = strings.Replace(string(content), oldVolumeMount, newVolumeMount, 1)
+	if newContent != string(content) {
+		content = []byte(newContent)
+		patchCount++
+	}
+
+	// Add volume definition after registry-config volume
+	oldVolume := `      - name: registry-config
+        configMap:
+          name: "{{ template "harbor.registry" . }}"`
+
+	newVolume := `      - name: registry-config
+        configMap:
+          name: "{{ template "harbor.registry" . }}"
+      {{- if .Values.expose.tls.enabled }}
+      - name: token-cert
+        secret:
+          secretName: {{ template "harbor.core" . }}
+      {{- end }}`
+
+	newContent = strings.Replace(string(content), oldVolume, newVolume, 1)
+	if newContent != string(content) {
+		if err := os.WriteFile(registryDplPath, []byte(newContent), 0644); err != nil {
+			return fmt.Errorf("failed to write registry-dpl.yaml: %w", err)
+		}
+		patchCount++
+	}
+
+	if patchCount > 0 {
+		fmt.Printf("    ✅ Registry templates patched (%d changes)\n", patchCount)
+	} else {
+		fmt.Println("    ⏭️  Registry templates already patched or not found")
+	}
+
 	return nil
 }
 
