@@ -48,15 +48,15 @@ git add modifications/ && git commit -m "feat: add config" && git push
 
 ## Files
 
-**template-overlays/** - Complete template replacements (reliza-cd compatible)
-- `core/core-dpl.yaml` - Core deployment with inline image conditional
+**template-overlays/** - Complete template replacements (use harbor.imageRef helper)
+- `core/core-dpl.yaml` - Core service
 - `core/core-pre-upgrade-job.yaml` - Pre-upgrade job with inline conditional
 - `exporter/exporter-dpl.yaml` - Metrics exporter
 - `jobservice/jobservice-dpl.yaml` - Job service
-- `nginx/deployment.yaml` - Nginx proxy
+- `nginx/deployment.yaml` - Nginx reverse proxy
 - `portal/deployment.yaml` - Web portal
 - `redis/statefulset.yaml` - Redis cache
-- `registry/registry-dpl.yaml` - Registry and controller (2 images)
+- `registry/registry-dpl.yaml` - Registry and registryctl
 - `trivy/trivy-sts.yaml` - Trivy scanner
 
 Note: Harbor's internal database templates (database-ss.yaml, database-svc.yaml, database-secret.yaml) 
