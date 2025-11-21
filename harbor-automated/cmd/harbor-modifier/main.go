@@ -625,6 +625,10 @@ func mergeValues(cfg *Config) error {
 				"httpsRedirect": map[string]interface{}{
 					"enabled": true,
 				},
+				"ipWhitelist": map[string]interface{}{
+					"enabled":     false,
+					"sourceRange": []interface{}{},
+				},
 			}
 		}
 	}

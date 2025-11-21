@@ -18,6 +18,17 @@ expose:
     # HTTPS redirect
     httpsRedirect:
       enabled: true
+    
+    # IP whitelist (optional)
+    ipWhitelist:
+      enabled: false
+      sourceRange: []
+      # Example: Restrict access to specific IPs
+      # enabled: true
+      # sourceRange:
+      #   - 192.168.1.1
+      #   - 155.155.155.5
+      #   - 10.0.0.0/8
   
   # TLS configuration
   tls:

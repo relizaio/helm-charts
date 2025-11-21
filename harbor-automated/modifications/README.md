@@ -74,7 +74,7 @@ are NOT included - they've been completely removed in favor of relizapostgresql 
 
 **templates/** - Custom resources
 - `traefik-ingressroute.yaml` - Traefik routing with priorities (API, chartrepo, registry, service, UI)
-- `traefik-middleware.yaml` - HTTPS redirect
+- `traefik-middleware.yaml` - HTTPS redirect and IP whitelist middlewares
 
 **values/** - Configuration
 - `labels.yaml` - Label customization

@@ -73,6 +73,7 @@ helm install harbor ./harbor-helm \
 - Traefik IngressRoute
 - Let's Encrypt TLS
 - HTTPS redirect
+- IP whitelist support
 - Custom middlewares support
 
 **Deploy:**
@@ -169,6 +170,26 @@ relizapostgresql:
     serviceMonitor:
       enabled: true  # If using Prometheus Operator
 ```
+
+### Configure IP Whitelist (Traefik)
+
+Restrict access to Harbor UI to specific IP addresses:
+
+```yaml
+expose:
+  type: traefik
+  traefik:
+    enabled: true
+    ipWhitelist:
+      enabled: true
+      sourceRange:
+        - XXX.XXX.XXX.XXX    # Office IP
+        - XXX.XXX.XXX.XXX    # VPN IP
+        - 10.0.0.0/8         # Internal network
+        - 192.168.1.0/24     # Local subnet
+```
+
+**Note:** IP whitelist applies to the Harbor UI (portal) routes. API routes remain accessible for Docker/Helm clients.
 
 ## Migration from Old Configuration
 
