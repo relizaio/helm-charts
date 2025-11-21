@@ -12,3 +12,20 @@ spec:
     scheme: https
     permanent: true
 {{- end }}
+
+{{- if and .Values.expose.traefik.enabled (eq .Values.expose.type "traefik") .Values.expose.traefik.ipWhitelist.enabled }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "harbor.fullname" . }}-ip-whitelist
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+spec:
+  ipWhiteList:
+    sourceRange:
+      {{- range .Values.expose.traefik.ipWhitelist.sourceRange }}
+      - {{ . }}
+      {{- end }}
+{{- end }}

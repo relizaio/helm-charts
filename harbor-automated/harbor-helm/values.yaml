@@ -140,6 +140,9 @@ expose:
         host: harbor.example.com
         httpsRedirect:
             enabled: true
+        ipWhitelist:
+            enabled: false
+            sourceRange: []
         middlewares: []
         tls:
             certResolver: ""

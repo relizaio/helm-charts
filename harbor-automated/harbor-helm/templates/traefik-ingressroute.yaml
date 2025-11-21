@@ -74,8 +74,11 @@ spec:
       services:
         - name: {{ include "harbor.fullname" . }}-portal
           port: 80
-      {{- if .Values.expose.traefik.middlewares }}
+      {{- if or .Values.expose.traefik.middlewares .Values.expose.traefik.ipWhitelist.enabled }}
       middlewares:
+        {{- if .Values.expose.traefik.ipWhitelist.enabled }}
+        - name: {{ include "harbor.fullname" . }}-ip-whitelist
+        {{- end }}
         {{- range .Values.expose.traefik.middlewares }}
         - name: {{ . }}
         {{- end }}
@@ -111,5 +114,8 @@ spec:
           port: 80
       middlewares:
         - name: {{ include "harbor.fullname" . }}-https-redirect
+        {{- if .Values.expose.traefik.ipWhitelist.enabled }}
+        - name: {{ include "harbor.fullname" . }}-ip-whitelist
+        {{- end }}
 {{- end }}
 {{- end }}
