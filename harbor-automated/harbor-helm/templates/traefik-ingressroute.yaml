@@ -53,6 +53,20 @@ spec:
         {{- end }}
       {{- end }}
     
+    # Core API endpoints (login, CSRF, etc.)
+    - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/c/`)
+      kind: Rule
+      priority: 18
+      services:
+        - name: {{ include "harbor.fullname" . }}-core
+          port: 80
+      {{- if .Values.expose.traefik.middlewares }}
+      middlewares:
+        {{- range .Values.expose.traefik.middlewares }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+    
     # Service endpoints (for replication and webhooks)
     - match: Host(`{{ .Values.expose.traefik.host }}`) && PathPrefix(`/service/`)
       kind: Rule
