@@ -73,7 +73,7 @@ are NOT included - they've been completely removed in favor of relizapostgresql 
 - `registry-dpl.yaml` - Patched to mount token certificate when TLS enabled (required for token auth)
 
 **templates/** - Custom resources
-- `traefik-ingressroute.yaml` - Traefik routing with priorities (API, chartrepo, registry, service, UI)
+- `traefik-ingressroute.yaml` - Traefik routing with priorities (API, chartrepo, registry, core endpoints, service, UI)
 - `traefik-middleware.yaml` - HTTPS redirect and IP whitelist middlewares
 
 **values/** - Configuration
