@@ -1,6 +1,15 @@
-# Verdaccio Helm Chart
+# Verdaccio with Reliza Quarantine Filter Helm Chart
 
-This Helm chart deploys Verdaccio, a lightweight private npm proxy registry, on a Kubernetes cluster.
+This Helm chart deploys [Verdaccio with Reliza Quarantine Filter](https://github.com/relizaio/dockerfile-collection/tree/main/verdaccio), a lightweight private npm proxy registry with built-in package quarantine capabilities, on a Kubernetes cluster.
+
+## What is Reliza Quarantine Filter?
+
+The Reliza Quarantine Filter is a security enhancement for Verdaccio that implements a configurable quarantine period for newly published npm packages. When a package is published to the upstream registry (npmjs.com), it is held in quarantine for a specified number of days before being made available through this proxy. This provides protection against supply chain attacks by giving the community time to identify and report malicious packages before they can be consumed by your projects.
+
+Key benefits:
+- **Supply chain security**: Delays availability of new packages, reducing exposure to malicious package attacks
+- **Configurable quarantine period**: Set the number of days packages must age before being available (default: 7 days)
+- **Transparent operation**: Works as a drop-in replacement for standard Verdaccio
 
 ## Prerequisites
 
@@ -48,9 +57,14 @@ The command removes all the Kubernetes components associated with the chart and 
 
 | Name                | Description                                          | Value                                                                                      |
 | ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `image.repository`  | Verdaccio image repository                           | `registry.relizahub.com/library/reliza-verdaccio`                                         |
-| `image.tag`         | Verdaccio image tag (immutable tags are recommended)| `sha256:5d7ea34f17ce57cb0e0c8bbb6a1adfdecc19e49f85d2a059c81f61dc606f8724`              |
-| `image.pullPolicy`  | Verdaccio image pull policy                          | `IfNotPresent`                                                                             |
+| `image`             | Verdaccio with Reliza Quarantine Filter image        | `registry.relizahub.com/library/reliza-verdaccio@sha256:...`                              |
+| `imagePullSecrets`  | Docker registry secret names as an array             | `[]`                                                                                       |
+
+### Quarantine Parameters
+
+| Name                | Description                                          | Value                                                                                      |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `quarantineDays`    | Number of days packages must age before being available through the proxy. This is the quarantine period for supply chain security. | `7`                                                                                        |
 
 ### Deployment parameters
 
@@ -89,6 +103,16 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Configuration and installation details
 
+### Quarantine Period
+
+The `quarantineDays` parameter controls how long newly published packages on npmjs.com must wait before being available through this proxy. For example, with the default value of `7`, a package published to npmjs.com today will only become available through this Verdaccio instance after 7 days.
+
+To adjust the quarantine period:
+
+```bash
+helm install my-verdaccio ./verdaccio --set quarantineDays=14
+```
+
 ### Using npm with Verdaccio
 
 Once Verdaccio is deployed, you can configure npm to use it:
@@ -111,3 +135,8 @@ The chart mounts a Persistent Volume at the `/verdaccio/storage` path. The volum
 ### Security
 
 The chart runs Verdaccio as a non-root user (UID 10001) for security purposes.
+
+## More Information
+
+For more details about the Reliza Quarantine Filter and the Docker image used by this chart, see:
+- [Verdaccio with Reliza Quarantine Filter Dockerfile](https://github.com/relizaio/dockerfile-collection/tree/main/verdaccio)
