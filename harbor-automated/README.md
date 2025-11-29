@@ -82,7 +82,3 @@ make clean    # Clean artifacts
 make lint     # Validate
 make help     # Show all
 ```
-
-## License
-
-Apache 2.0
