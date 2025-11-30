@@ -1,0 +1,73 @@
+# PostgreSQL Backup to S3 Configuration
+# Backs up Harbor's PostgreSQL database to AWS S3 (or S3-compatible storage)
+
+backup:
+  # Enable/disable backup CronJob
+  enabled: false
+
+  # Cron schedule (default: every 30 minutes)
+  schedule: "*/30 * * * *"
+
+  # Job history
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  suspend: false
+
+  # Backup image
+  image:
+    repository: relizaio/psql-awscli
+    tag: 25.11.0
+    digest: "sha256:d349d0b4780f560b0aba0432c9761180231c17526478799693a93d5b3a18f5df"
+    pullPolicy: IfNotPresent
+
+  # Dump file prefix
+  dumpPrefix: "dbdump-harbor-registry"
+
+  # PostgreSQL connection settings
+  postgresql:
+    # Username for database connection
+    username: postgres
+    # Database name to backup
+    database: registry
+    # Host (leave empty to auto-detect from relizapostgresql)
+    host: ""
+
+    # Option 1: Use existing secret for password
+    existingSecret: ""
+    existingSecretKey: "password"
+
+    # Option 2: Provide password directly (only used if existingSecret is empty)
+    password: ""
+
+  # S3 storage settings
+  s3:
+    # S3 bucket name (required)
+    bucket: ""
+    # AWS region
+    region: "us-east-1"
+    # Custom endpoint for S3-compatible storage (e.g., MinIO)
+    endpoint: ""
+
+    # Option 1: Use existing secret for AWS credentials
+    existingSecret: ""
+    existingSecretAccessKeyId: "aws-access-key-id"
+    existingSecretAccessKeySecret: "aws-secret-access-key"
+
+    # Option 2: Provide credentials directly (only used if existingSecret is empty)
+    accessKeyId: ""
+    secretAccessKey: ""
+
+  # Resource limits
+  resources: {}
+  #  limits:
+  #    cpu: 500m
+  #    memory: 512Mi
+  #  requests:
+  #    cpu: 100m
+  #    memory: 128Mi
+
+  # Node selector
+  nodeSelector: {}
+
+  # Tolerations
+  tolerations: []

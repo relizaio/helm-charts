@@ -1,0 +1,116 @@
+{{- if .Values.backup.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "harbor.fullname" . }}-pg-backup
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+    component: backup
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.backup.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.backup.successfulJobsHistoryLimit }}
+  suspend: {{ .Values.backup.suspend }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "harbor.labels" . | nindent 12 }}
+            component: backup
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 30
+          {{- with .Values.backup.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.backup.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+          - name: pg-backup
+            image: {{ .Values.backup.image.repository }}{{ if .Values.backup.image.digest }}@{{ .Values.backup.image.digest }}{{ else }}:{{ .Values.backup.image.tag }}{{ end }}
+            imagePullPolicy: {{ .Values.backup.image.pullPolicy }}
+            env:
+              # PostgreSQL connection
+              - name: PG_USER
+                value: {{ .Values.backup.postgresql.username | quote }}
+              - name: PG_HOST
+                {{- if .Values.backup.postgresql.host }}
+                value: {{ .Values.backup.postgresql.host | quote }}
+                {{- else }}
+                value: {{ include "harbor.fullname" . }}-relizapostgresql
+                {{- end }}
+              - name: PG_DATABASE
+                value: {{ .Values.backup.postgresql.database | quote }}
+              - name: DUMP_PREFIX
+                value: {{ .Values.backup.dumpPrefix | quote }}
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.backup.postgresql.existingSecret | default (printf "%s-backup-pg" (include "harbor.fullname" .)) }}
+                    key: {{ .Values.backup.postgresql.existingSecretKey | default "password" }}
+              # AWS S3 configuration
+              - name: AWS_BUCKET
+                value: {{ .Values.backup.s3.bucket | quote }}
+              - name: AWS_DEFAULT_REGION
+                value: {{ .Values.backup.s3.region | quote }}
+              {{- if .Values.backup.s3.endpoint }}
+              - name: AWS_ENDPOINT_URL
+                value: {{ .Values.backup.s3.endpoint | quote }}
+              {{- end }}
+              - name: AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.backup.s3.existingSecret | default (printf "%s-backup-s3" (include "harbor.fullname" .)) }}
+                    key: {{ .Values.backup.s3.existingSecretAccessKeyId | default "aws-access-key-id" }}
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.backup.s3.existingSecret | default (printf "%s-backup-s3" (include "harbor.fullname" .)) }}
+                    key: {{ .Values.backup.s3.existingSecretAccessKeySecret | default "aws-secret-access-key" }}
+            {{- with .Values.backup.resources }}
+            resources:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+{{- end }}
+
+{{- if and .Values.backup.enabled (not .Values.backup.postgresql.existingSecret) }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "harbor.fullname" . }}-backup-pg
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+    component: backup
+type: Opaque
+stringData:
+  password: {{ .Values.backup.postgresql.password | quote }}
+{{- end }}
+
+{{- if and .Values.backup.enabled (not .Values.backup.s3.existingSecret) }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "harbor.fullname" . }}-backup-s3
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+    component: backup
+type: Opaque
+stringData:
+  aws-access-key-id: {{ .Values.backup.s3.accessKeyId | quote }}
+  aws-secret-access-key: {{ .Values.backup.s3.secretAccessKey | quote }}
+{{- end }}
