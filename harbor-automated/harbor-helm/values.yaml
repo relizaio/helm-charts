@@ -136,6 +136,7 @@ expose:
         secret:
             secretName: ""
     traefik:
+        apiVersion: traefik.io/v1alpha1
         enabled: false
         host: harbor.example.com
         httpsRedirect:

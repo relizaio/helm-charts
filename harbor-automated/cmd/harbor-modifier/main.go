@@ -614,6 +614,7 @@ func mergeValues(cfg *Config) error {
 	if expose, ok := existingValues["expose"].(map[string]interface{}); ok {
 		if _, ok := expose["traefik"]; !ok {
 			expose["traefik"] = map[string]interface{}{
+				"apiVersion":  "traefik.io/v1alpha1",
 				"enabled":     false,
 				"host":        "harbor.example.com",
 				"middlewares": []interface{}{},

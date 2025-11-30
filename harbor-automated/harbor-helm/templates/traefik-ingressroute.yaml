@@ -1,6 +1,6 @@
 {{- if and .Values.expose.traefik.enabled (eq .Values.expose.type "traefik") }}
 ---
-apiVersion: traefik.io/v1alpha1
+apiVersion: {{ .Values.expose.traefik.apiVersion }}
 kind: IngressRoute
 metadata:
   name: {{ include "harbor.fullname" . }}-https
@@ -110,7 +110,7 @@ spec:
 
 {{- if .Values.expose.traefik.httpsRedirect.enabled }}
 ---
-apiVersion: traefik.io/v1alpha1
+apiVersion: {{ .Values.expose.traefik.apiVersion }}
 kind: IngressRoute
 metadata:
   name: {{ include "harbor.fullname" . }}-http
