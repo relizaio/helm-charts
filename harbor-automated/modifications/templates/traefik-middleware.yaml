@@ -4,7 +4,7 @@ apiVersion: {{ .Values.expose.traefik.apiVersion }}
 kind: Middleware
 metadata:
   name: {{ include "harbor.fullname" . }}-https-redirect
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace  | quote  }}
   labels:
     {{- include "harbor.labels" . | nindent 4 }}
 spec:
@@ -19,7 +19,7 @@ apiVersion: {{ .Values.expose.traefik.apiVersion }}
 kind: Middleware
 metadata:
   name: {{ include "harbor.fullname" . }}-ip-whitelist
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "harbor.labels" . | nindent 4 }}
 spec:
