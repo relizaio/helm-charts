@@ -14,11 +14,8 @@ backup:
   suspend: false
 
   # Backup image
-  image:
-    repository: relizaio/psql-awscli
-    tag: 25.11.0
-    digest: "sha256:d349d0b4780f560b0aba0432c9761180231c17526478799693a93d5b3a18f5df"
-    pullPolicy: IfNotPresent
+  image: relizaio/psql-awscli:25.11.0@sha256:d349d0b4780f560b0aba0432c9761180231c17526478799693a93d5b3a18f5df
+  imagePullPolicy: IfNotPresent
 
   # Dump file prefix
   dumpPrefix: "dbdump-harbor-registry"

@@ -38,8 +38,8 @@ spec:
           {{- end }}
           containers:
           - name: pg-backup
-            image: {{ .Values.backup.image.repository }}{{ if .Values.backup.image.digest }}@{{ .Values.backup.image.digest }}{{ else }}:{{ .Values.backup.image.tag }}{{ end }}
-            imagePullPolicy: {{ .Values.backup.image.pullPolicy }}
+            image: {{ .Values.backup.image }}
+            imagePullPolicy: {{ .Values.backup.imagePullPolicy }}
             env:
               # PostgreSQL connection
               - name: PG_USER
