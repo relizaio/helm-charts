@@ -1,3 +1,34 @@
+backup:
+    dumpPrefix: dbdump-harbor-registry
+    enabled: false
+    failedJobsHistoryLimit: 1
+    image:
+        digest: sha256:d349d0b4780f560b0aba0432c9761180231c17526478799693a93d5b3a18f5df
+        pullPolicy: IfNotPresent
+        repository: relizaio/psql-awscli
+        tag: 25.11.0
+    nodeSelector: {}
+    postgresql:
+        database: registry
+        existingSecret: ""
+        existingSecretKey: password
+        host: ""
+        password: ""
+        username: postgres
+    resources: {}
+    s3:
+        accessKeyId: ""
+        bucket: ""
+        endpoint: ""
+        existingSecret: ""
+        existingSecretAccessKeyId: aws-access-key-id
+        existingSecretAccessKeySecret: aws-secret-access-key
+        region: us-east-1
+        secretAccessKey: ""
+    schedule: '*/30 * * * *'
+    successfulJobsHistoryLimit: 3
+    suspend: false
+    tolerations: []
 caSecretName: ""
 cache:
     enabled: false
