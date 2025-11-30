@@ -2,7 +2,7 @@ name: Push Helm Charts on Change
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - 'ecr-regcred/**'
       - 'reliza-cd/**'
@@ -12,13 +12,9 @@ on:
       - 'sealed-secrets/**'
       - 'verdaccio/**'
       - '.github/workflows/helmbuild.yml'
-  workflow_run:
-    workflows: ["Build Harbor Chart"]
-    types: [completed]
-    branches: [main, master]
+      - 'harbor-automated/harbor-helm/**'
 
 jobs:
-
   build-ecr-regcred:
     permissions:
       contents: write
@@ -140,7 +136,6 @@ jobs:
           path: verdaccio
 
   build-harbor-automated:
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: write
     name: Build And Push Harbor Automated Helm Chart
