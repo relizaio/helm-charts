@@ -79,6 +79,9 @@ kind: Job
 metadata:
   name: reliza-ecr-regcred-init
   namespace: {{ .Values.namespace_override | default .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 4
   template:
