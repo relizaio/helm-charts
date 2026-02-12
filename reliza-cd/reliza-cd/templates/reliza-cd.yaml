@@ -36,6 +36,14 @@ spec:
             value: {{ .Values.enableWatcher | quote }}
           - name: WATCHER_IMAGE
             value: {{ .Values.images.watcherImage | quote }}
+          - name: BACKUP_ENABLED
+            value: {{ .Values.backup.enabled | quote }}
+          - name: BACKUP_SCHEDULE
+            value: {{ .Values.backup.schedule | quote }}
+          - name: AWS_REGION
+            value: {{ .Values.backup.awsRegion | quote }}
+          - name: BACKUP_PREFIX
+            value: {{ .Values.backup.prefix | quote }}
           envFrom:
           - secretRef:
               name: reliza-cd

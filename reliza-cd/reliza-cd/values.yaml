@@ -7,6 +7,11 @@ images:
   relizacdImage: relizaio/reliza-cd:26.02.2@sha256:2e3803feacb0bc738fd26793e941f0391f0451b83eb536e3938c168265486544
 
 enableWatcher: true
+backup:
+  enabled: false
+  schedule: "0 2 * * *" # cron schedule for backup, default is 2 AM daily
+  awsRegion: "ca-central-1"
+  prefix: "reliza-cd-backup"
 
 storageSize: 1G
 
