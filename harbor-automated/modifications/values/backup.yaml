@@ -54,6 +54,28 @@ backup:
     accessKeyId: ""
     secretAccessKey: ""
 
+  # Skopeo (container image) backup to S3
+  skopeo:
+    # Enable/disable skopeo backup CronJob
+    enabled: false
+    # Cron schedule (default: every 30 minutes)
+    schedule: "*/30 * * * *"
+    # S3 bucket name
+    bucket: none
+    # Backup prefix
+    prefix: skopeo
+    # AWS region
+    aws_region: ca-central-1
+    # Skopeo backuper image
+    image: registry.relizahub.com/library/skopeo-backuper
+    # Existing secret for AWS credentials
+    existingSecret: "aws-backups"
+    existingSecretAccessKeyId: "aws-access-key-id"
+    existingSecretAccessKeySecret: "aws-secret-access-key"
+    # Existing secret for encryption password
+    existingEncryptionSecret: "backup-encryption"
+    existingEncryptionSecretKey: "encryption-password"
+
   # Resource limits
   resources: {}
   #  limits:
