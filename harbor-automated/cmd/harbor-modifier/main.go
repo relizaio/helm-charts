@@ -546,12 +546,6 @@ func applyTemplates(cfg *Config) error {
 		basename := filepath.Base(tmpl)
 		target := filepath.Join(targetDir, basename)
 
-		// Check if already exists
-		if _, err := os.Stat(target); err == nil {
-			fmt.Printf("    ⏭️  %s already exists, skipping...\n", basename)
-			continue
-		}
-
 		content, err := os.ReadFile(tmpl)
 		if err != nil {
 			return fmt.Errorf("failed to read %s: %w", tmpl, err)

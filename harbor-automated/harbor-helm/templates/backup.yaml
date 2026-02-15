@@ -114,3 +114,101 @@ stringData:
   aws-access-key-id: {{ .Values.backup.s3.accessKeyId | quote }}
   aws-secret-access-key: {{ .Values.backup.s3.secretAccessKey | quote }}
 {{- end }}
+
+{{- if .Values.backup.skopeo.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "harbor.fullname" . }}-skopeo-backuper
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+    component: skopeo-backup
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "harbor.fullname" . }}-pod-reader
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+    component: skopeo-backup
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "harbor.fullname" . }}-skopeo-backuper-pod-reader
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+    component: skopeo-backup
+subjects:
+- kind: ServiceAccount
+  name: {{ include "harbor.fullname" . }}-skopeo-backuper
+  namespace: {{ .Release.Namespace | quote }}
+roleRef:
+  kind: Role
+  name: {{ include "harbor.fullname" . }}-pod-reader
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "harbor.fullname" . }}-skopeo-backup
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "harbor.labels" . | nindent 4 }}
+    component: skopeo-backup
+spec:
+  schedule: {{ .Values.backup.skopeo.schedule | quote }}
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "harbor.labels" . | nindent 12 }}
+            component: skopeo-backup
+        spec:
+          serviceAccountName: {{ include "harbor.fullname" . }}-skopeo-backuper
+          restartPolicy: Never
+          containers:
+          - name: skopeo-backup
+            image: {{ .Values.backup.skopeo.image }}
+            env:
+              - name: K8S_NAMESPACE
+                value: {{ .Release.Namespace | quote }}
+              - name: AWS_DEFAULT_REGION
+                value: {{ .Values.backup.skopeo.aws_region | quote }}
+              - name: AWS_BUCKET
+                value: {{ .Values.backup.skopeo.bucket | quote }}
+              - name: BACKUP_PREFIX
+                value: {{ .Values.backup.skopeo.prefix | quote }}
+              - name: AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.backup.skopeo.existingSecret | default "aws-backups" }}
+                    key: {{ .Values.backup.skopeo.existingSecretAccessKeyId }}
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.backup.skopeo.existingSecret | default "aws-backups" }}
+                    key: {{ .Values.backup.skopeo.existingSecretAccessKeySecret }}
+              - name: ENCRYPTION_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.backup.skopeo.existingEncryptionSecret | default "backup-encryption" }}
+                    key: {{ .Values.backup.skopeo.existingEncryptionSecretKey }}
+{{- end }}
