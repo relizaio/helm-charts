@@ -12,7 +12,7 @@ on:
       - 'sealed-secrets/**'
       - 'verdaccio/**'
       - '.github/workflows/helmbuild.yml'
-      - 'harbor-automated/harbor-helm/**'
+      - 'harbor-automated/**'
 
 jobs:
   build-ecr-regcred:
