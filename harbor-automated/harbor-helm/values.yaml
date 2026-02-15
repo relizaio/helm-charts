@@ -23,6 +23,18 @@ backup:
         region: us-east-1
         secretAccessKey: ""
     schedule: '*/30 * * * *'
+    skopeo:
+        enabled: false
+        schedule: "*/30 * * * *"
+        bucket: none
+        prefix: skopeo
+        aws_region: ca-central-1
+        image: registry.relizahub.com/library/skopeo-backuper
+        existingSecret: "aws-backups"
+        existingSecretAccessKeyId: aws-access-key-id
+        existingSecretAccessKeySecret: aws-secret-access-key
+        existingEncryptionSecret: "backup-encryption"
+        existingEncryptionSecretKey: encryption-password
     successfulJobsHistoryLimit: 3
     suspend: false
     tolerations: []
