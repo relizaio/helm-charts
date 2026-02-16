@@ -4,7 +4,7 @@
 mode: STANDALONE # options: STANDALONE, EXISTING_ARGO, NEW_ARGO
 imagePullPolicy: IfNotPresent
 images:
-  relizacdImage: relizaio/reliza-cd:26.02.5@sha256:299edc1adaaf7122bfdd3481fca406fb2711a3fd5fd13093a9aac685c9990a3a
+  relizacdImage: relizaio/reliza-cd:26.02.6@sha256:d3cd78a28f802fe3d3da29497b415ea81e2537ae71a3598be6a5ca2c974f1daa
 
 enableWatcher: true
 backup:
