@@ -479,7 +479,7 @@ primary:
   ## @param primary.resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
   ## More information: https://github.com/relizaio/dockerfile-collection/tree/main/postgresql-17#resource-presets
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "small"
   ## @param primary.resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
