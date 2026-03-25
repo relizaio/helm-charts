@@ -1,0 +1,17 @@
+image:
+  mariadb: docker.io/library/mariadb:12.3.1-ubi10-rc@sha256:2b406655eab69c4cf1da91fc8b0c42606ecbe3959e3320dcfb82f3134574a4d8
+  wordpress: docker.io/library/wordpress:php8.5-apache@sha256:44a1b0f1c474f9f22ceb419aeb215e3759d432e0cdefbe4eb43ec3947d23ce76
+
+mariadb:
+  storage: 5Gi
+
+wordpress:
+  storage: 5Gi
+  dbUser: root
+  dbName: wordpress
+
+existingSecret: mariadbpass
+existingSecretKey: password
+
+ingressHost: example.com
+useTraefikLe: true

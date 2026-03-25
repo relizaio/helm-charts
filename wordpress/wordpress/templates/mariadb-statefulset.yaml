@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "wordpress.fullname" . }}-mariadb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+    component: mariadb
+spec:
+  selector:
+    matchLabels:
+      {{- include "wordpress.selectorLabels" . | nindent 6 }}
+      component: mariadb
+  replicas: 1
+  serviceName: {{ include "wordpress.fullname" . }}-mariadb
+  template:
+    metadata:
+      labels:
+        {{- include "wordpress.selectorLabels" . | nindent 8 }}
+        component: mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: {{ .Values.image.mariadb }}
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.existingSecret }}
+                key: {{ .Values.existingSecretKey }}
+          ports:
+          - containerPort: 3306
+          volumeMounts:
+          - mountPath: "/var/lib/mysql"
+            name: mysql-data
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.mariadb.storage }}

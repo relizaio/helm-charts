@@ -1,0 +1,13 @@
+apiVersion: v2
+name: wordpress
+description: A minimal Helm chart for WordPress with MariaDB
+type: application
+version: 0.0.1
+appVersion: "php8.5-apache"
+keywords:
+  - wordpress
+  - mariadb
+  - cms
+maintainers:
+  - name: Reliza
+    email: info@reliza.io

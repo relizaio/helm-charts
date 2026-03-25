@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wordpress.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+    component: wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "wordpress.selectorLabels" . | nindent 6 }}
+      component: wordpress
+  template:
+    metadata:
+      labels:
+        {{- include "wordpress.selectorLabels" . | nindent 8 }}
+        component: wordpress
+    spec:
+      containers:
+      - name: wordpress
+        image: {{ .Values.image.wordpress }}
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: {{ include "wordpress.fullname" . }}-mariadb
+        - name: WORDPRESS_DB_USER
+          value: {{ .Values.wordpress.dbUser }}
+        - name: WORDPRESS_DB_NAME
+          value: {{ .Values.wordpress.dbName }}
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.existingSecret }}
+              key: {{ .Values.existingSecretKey }}
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: "/var/www/html"
+          name: wp-data
+      volumes:
+        - name: wp-data
+          persistentVolumeClaim:
+            claimName: {{ include "wordpress.fullname" . }}-data

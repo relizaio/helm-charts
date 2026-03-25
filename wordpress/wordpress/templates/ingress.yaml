@@ -1,0 +1,50 @@
+{{- if .Values.useTraefikLe }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "wordpress.fullname" . }}-web-ingressroute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`{{ .Values.ingressHost }}`)
+    kind: Rule
+    services:
+    - name: {{ include "wordpress.fullname" . }}
+      port: 80
+    middlewares:
+      - name: {{ include "wordpress.fullname" . }}-redirect
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "wordpress.fullname" . }}-websecure-ingressroute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`{{ .Values.ingressHost }}`)
+    kind: Rule
+    services:
+    - name: {{ include "wordpress.fullname" . }}
+      port: 80
+  tls:
+    certResolver: le
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "wordpress.fullname" . }}-redirect
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+spec:
+  redirectScheme:
+    scheme: https
+{{- end }}
