@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mafia-ui
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: mafia-ui
+    app: mafia
+spec:
+  replicas: {{ .Values.ui.replicaCount }}
+  selector:
+    matchLabels:
+      app: mafia
+  template:
+    metadata:
+      labels:
+        name: mafia-ui
+        app: mafia
+    spec:
+      containers:
+      - name: mafia-ui-container
+        image: {{ .Values.ui.image }}
+        env:
+        - name: HUB_HOST
+          value: mafia-backend-service
+        - name: HUB_PORT
+          value: "3000"
+        ports:
+        - containerPort: 80
+      imagePullSecrets: 
+      - name : regcred-mafia

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mafia-backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: mafia-backend
+    app: mafia
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: mafia
+  template:
+    metadata:
+      labels:
+        name: mafia-backend
+        app: mafia
+    spec:
+      containers:
+      - name: mafia-backend-container
+        image: {{ .Values.backend.image }}
+        env:
+        - name: REDIS_HOST
+          value: redis-service.mafia
+        ports:
+        - containerPort: 3000
+      imagePullSecrets: 
+      - name : regcred-mafia

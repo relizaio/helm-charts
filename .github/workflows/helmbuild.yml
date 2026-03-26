@@ -14,6 +14,7 @@ on:
       - '.github/workflows/helmbuild.yml'
       - 'harbor-automated/harbor-helm/**'
       - 'wordpress/**'
+      - 'mafia/**'
 
 jobs:
   build-ecr-regcred:
@@ -170,5 +171,25 @@ jobs:
           rearm_api_key: ${{ secrets.REARM_WORDPRESS_HELM_API_KEY }}
           rearm_api_url: https://reliza.rearmhq.com
           path: wordpress
+          enable_sbom: true
+          enable_public_cosign_sigstore: true
+  build-mafia:
+    permissions:
+      contents: write
+      id-token: write
+    name: Build And Push Mafia Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build And Submit Wordpress Helm to ReARM
+        uses: relizaio/rearm-helm-action@a9984fe2e241a8e5838be5415f58936dc92c2421 # v1.7.0
+        with:
+          registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
+          registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
+          registry_host: registry.relizahub.com/library
+          helm_chart_name: wordpress
+          rearm_api_id: ${{ secrets.REARM_MAFIA_HELM_API_ID }}
+          rearm_api_key: ${{ secrets.REARM_MAFIA_HELM_API_KEY }}
+          rearm_api_url: https://reliza.rearmhq.com
+          path: mafia
           enable_sbom: true
           enable_public_cosign_sigstore: true
