@@ -2,7 +2,7 @@ apiVersion: v2
 name: wordpress
 description: A minimal Helm chart for WordPress with MariaDB
 type: application
-version: 0.0.1
+version: 0.0.2
 appVersion: "php8.5-apache"
 keywords:
   - wordpress
