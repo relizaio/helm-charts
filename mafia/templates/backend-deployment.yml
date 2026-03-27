@@ -22,7 +22,7 @@ spec:
         image: {{ .Values.backend.image }}
         env:
         - name: REDIS_HOST
-          value: redis-service.mafia
+          value: redis-service
         ports:
         - containerPort: 3000
       imagePullSecrets: 
