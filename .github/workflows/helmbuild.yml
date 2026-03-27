@@ -186,7 +186,7 @@ jobs:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
           registry_host: registry.relizahub.com/library
-          helm_chart_name: wordpress
+          helm_chart_name: mafia
           rearm_api_id: ${{ secrets.REARM_MAFIA_HELM_API_ID }}
           rearm_api_key: ${{ secrets.REARM_MAFIA_HELM_API_KEY }}
           rearm_api_url: https://reliza.rearmhq.com
