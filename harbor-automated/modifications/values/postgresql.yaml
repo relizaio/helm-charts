@@ -7,6 +7,9 @@ relizapostgresql:
     username: harbor
     password: changeit
     database: registry
+    existingSecret: ""
+    secretKeys:
+      userPasswordKey: password
   primary:
     persistence:
       enabled: true

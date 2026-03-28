@@ -494,7 +494,10 @@ registry:
 relizapostgresql:
     auth:
         database: registry
+        existingSecret: ""
         password: changeit
+        secretKeys:
+            userPasswordKey: password
         username: harbor
     enabled: true
     metrics:

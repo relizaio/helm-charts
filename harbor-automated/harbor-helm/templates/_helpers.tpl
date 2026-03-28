@@ -111,9 +111,27 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.rawPassword" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.password -}}
+    {{- if not .Values.relizapostgresql.auth.existingSecret -}}
+      {{- .Values.relizapostgresql.auth.password -}}
+    {{- end -}}
   {{- else -}}
     {{- .Values.database.external.password -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "harbor.database.existingSecretName" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- .Values.relizapostgresql.auth.existingSecret -}}
+  {{- else -}}
+    {{- .Values.database.external.existingSecret -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "harbor.database.existingSecretPasswordKey" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- .Values.relizapostgresql.auth.secretKeys.userPasswordKey | default "password" -}}
+  {{- else -}}
+    {{- "password" -}}
   {{- end -}}
 {{- end -}}
 

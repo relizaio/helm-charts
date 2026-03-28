@@ -41,13 +41,13 @@ spec:
             name: "{{ template "harbor.core" . }}"
         - secretRef:
             name: "{{ template "harbor.core" . }}"
-        {{- if .Values.database.external.existingSecret }}
+        {{- if (include "harbor.database.existingSecretName" .) }}
         env:
           - name: POSTGRESQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.database.external.existingSecret }}
-                key: password
+                name: {{ include "harbor.database.existingSecretName" . }}
+                key: {{ include "harbor.database.existingSecretPasswordKey" . }}
         {{- end }}
         {{- if not (empty .Values.containerSecurityContext) }}
         securityContext: {{ .Values.containerSecurityContext | toYaml | nindent 10 }}
