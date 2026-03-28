@@ -307,7 +307,7 @@ app: "{{ template "harbor.name" . }}"
 {{- end -}}
 
 {{- define "harbor.database" -}}
-  {{- printf "%s-relizapostgresql" (include "harbor.fullname" .) -}}
+  {{- printf "%s-postgresql" (include "harbor.fullname" .) -}}
 {{- end -}}
 
 {{- define "harbor.trivy" -}}

@@ -23,7 +23,7 @@ relizapostgresql:
 # 1. Internal Database (DEFAULT):
 #    database.type: internal
 #    - Uses relizapostgresql subchart
-#    - Harbor connects to {{ .Release.Name }}-relizapostgresql service
+#    - Harbor connects to {{ .Release.Name }}-postgresql service
 #    - Configure via relizapostgresql.* settings above
 #
 # 2. External Database (for migration or managed DB):

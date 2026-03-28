@@ -283,7 +283,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 {{- end -}}`
 
 	newDatabase := `{{- define "harbor.database" -}}
-  {{- printf "%s-relizapostgresql" (include "harbor.fullname" .) -}}
+  {{- printf "%s-postgresql" (include "harbor.fullname" .) -}}
 {{- end -}}`
 
 	newContent = strings.Replace(newContent, oldDatabase, newDatabase, 1)
