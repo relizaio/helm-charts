@@ -497,6 +497,7 @@ relizapostgresql:
         existingSecret: ""
         password: changeit
         secretKeys:
+            adminPasswordKey: postgres-password
             userPasswordKey: password
         username: harbor
     enabled: true

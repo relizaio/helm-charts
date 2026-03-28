@@ -9,6 +9,7 @@ relizapostgresql:
     database: registry
     existingSecret: ""
     secretKeys:
+      adminPasswordKey: postgres-password
       userPasswordKey: password
   primary:
     persistence:

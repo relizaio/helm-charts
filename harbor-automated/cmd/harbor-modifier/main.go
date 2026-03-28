@@ -342,7 +342,12 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 {{- define "harbor.database.existingSecretPasswordKey" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.secretKeys.userPasswordKey | default "password" -}}
+    {{- $user := .Values.relizapostgresql.auth.username -}}
+    {{- if or (empty $user) (eq $user "postgres") -}}
+      {{- coalesce .Values.relizapostgresql.auth.secretKeys.adminPasswordKey "postgres-password" -}}
+    {{- else -}}
+      {{- coalesce .Values.relizapostgresql.auth.secretKeys.userPasswordKey "password" -}}
+    {{- end -}}
   {{- else -}}
     {{- "password" -}}
   {{- end -}}
