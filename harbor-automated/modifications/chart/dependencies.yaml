@@ -3,5 +3,4 @@ dependencies:
   - name: postgresql
     version: ">=0.1.3"
     repository: oci://registry.relizahub.com/library
-    condition: relizapostgresql.enabled
-    alias: relizapostgresql
+    condition: postgresql.enabled

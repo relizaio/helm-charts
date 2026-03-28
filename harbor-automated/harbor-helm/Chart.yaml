@@ -1,9 +1,8 @@
 apiVersion: v2
 appVersion: 2.14.0
 dependencies:
-    - alias: relizapostgresql
-      condition: relizapostgresql.enabled
-      name: postgresql
+    - name: postgresql
+      condition: postgresql.enabled
       repository: oci://registry.relizahub.com/library
       version: '>=0.1.3'
 description: An open source trusted cloud native registry that stores, signs, and scans content

@@ -149,14 +149,14 @@ func applyModifications(cfg *Config) error {
 		return fmt.Errorf("failed to apply helpers: %w", err)
 	}
 
-	// 1.5. Patch database templates for relizapostgresql support
+	// 1.5. Patch database templates for postgresql support
 	if err := patchDatabaseTemplates(cfg); err != nil {
 		return fmt.Errorf("failed to patch database templates: %w", err)
 	}
 
-	// 1.55. Remove redundant harbor.relizapostgresql template (harbor.database now points to it)
+	// 1.55. Remove redundant harbor.postgresql template (harbor.database now points to it)
 	if err := removeRelizaPostgresqlTemplate(cfg); err != nil {
-		return fmt.Errorf("failed to remove harbor.relizapostgresql template: %w", err)
+		return fmt.Errorf("failed to remove harbor.postgresql template: %w", err)
 	}
 
 	// 1.56. Patch harbor.autoGenCertForNginx to exclude Traefik
@@ -169,7 +169,7 @@ func applyModifications(cfg *Config) error {
 		return fmt.Errorf("failed to patch registry templates: %w", err)
 	}
 
-	// 1.6. Remove harbor-db templates (replaced by relizapostgresql)
+	// 1.6. Remove harbor-db templates (replaced by postgresql)
 	if err := removeHarborDatabase(cfg); err != nil {
 		return fmt.Errorf("failed to remove harbor-db templates: %w", err)
 	}
@@ -244,7 +244,7 @@ func removeHarborDatabase(cfg *Config) error {
 
 	databaseDir := filepath.Join(cfg.ChartDir, "templates", "database")
 
-	// Files to remove (harbor's internal database, replaced by relizapostgresql)
+	// Files to remove (harbor's internal database, replaced by postgresql)
 	filesToRemove := []string{
 		"database-ss.yaml",
 		"database-svc.yaml",
@@ -266,7 +266,7 @@ func removeHarborDatabase(cfg *Config) error {
 }
 
 func patchDatabaseTemplates(cfg *Config) error {
-	fmt.Println("  → Patching database templates for relizapostgresql...")
+	fmt.Println("  → Patching database templates for postgresql...")
 
 	targetFile := filepath.Join(cfg.ChartDir, "templates", "_helpers.tpl")
 
@@ -277,7 +277,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newContent := string(content)
 
-	// 1. Replace harbor.database definition to point to relizapostgresql service
+	// 1. Replace harbor.database definition to point to postgresql service
 	oldDatabase := `{{- define "harbor.database" -}}
   {{- printf "%s-database" (include "harbor.fullname" .) -}}
 {{- end -}}`
@@ -288,7 +288,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newContent = strings.Replace(newContent, oldDatabase, newDatabase, 1)
 
-	// 2. Update harbor.database.username to use relizapostgresql.auth.username
+	// 2. Update harbor.database.username to use postgresql.auth.username
 	oldUsername := `{{- define "harbor.database.username" -}}
   {{- if eq .Values.database.type "internal" -}}
     {{- printf "%s" "postgres" -}}
@@ -299,7 +299,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newUsername := `{{- define "harbor.database.username" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.username -}}
+    {{- .Values.postgresql.auth.username -}}
   {{- else -}}
     {{- .Values.database.external.username -}}
   {{- end -}}
@@ -307,7 +307,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newContent = strings.Replace(newContent, oldUsername, newUsername, 1)
 
-	// 3. Update harbor.database.rawPassword to use relizapostgresql.auth.password (remove secret lookup)
+	// 3. Update harbor.database.rawPassword to use postgresql.auth.password (remove secret lookup)
 	// Also respects existingSecret - returns empty when secret is external
 	oldPassword := `{{- define "harbor.database.rawPassword" -}}
   {{- if eq .Values.database.type "internal" -}}
@@ -324,8 +324,8 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newPassword := `{{- define "harbor.database.rawPassword" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- if not .Values.relizapostgresql.auth.existingSecret -}}
-      {{- .Values.relizapostgresql.auth.password -}}
+    {{- if not .Values.postgresql.auth.existingSecret -}}
+      {{- .Values.postgresql.auth.password -}}
     {{- end -}}
   {{- else -}}
     {{- .Values.database.external.password -}}
@@ -334,7 +334,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 {{- define "harbor.database.existingSecretName" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.existingSecret -}}
+    {{- .Values.postgresql.auth.existingSecret -}}
   {{- else -}}
     {{- .Values.database.external.existingSecret -}}
   {{- end -}}
@@ -342,11 +342,11 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 {{- define "harbor.database.existingSecretPasswordKey" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- $user := .Values.relizapostgresql.auth.username -}}
+    {{- $user := .Values.postgresql.auth.username -}}
     {{- if or (empty $user) (eq $user "postgres") -}}
-      {{- coalesce .Values.relizapostgresql.auth.secretKeys.adminPasswordKey "postgres-password" -}}
+      {{- coalesce .Values.postgresql.auth.secretKeys.adminPasswordKey "postgres-password" -}}
     {{- else -}}
-      {{- coalesce .Values.relizapostgresql.auth.secretKeys.userPasswordKey "password" -}}
+      {{- coalesce .Values.postgresql.auth.secretKeys.userPasswordKey "password" -}}
     {{- end -}}
   {{- else -}}
     {{- "password" -}}
@@ -355,7 +355,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newContent = strings.Replace(newContent, oldPassword, newPassword, 1)
 
-	// 4. Update harbor.database.coreDatabase to use relizapostgresql.auth.database
+	// 4. Update harbor.database.coreDatabase to use postgresql.auth.database
 	oldCoreDatabase := `{{- define "harbor.database.coreDatabase" -}}
   {{- if eq .Values.database.type "internal" -}}
     {{- printf "%s" "registry" -}}
@@ -366,7 +366,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newCoreDatabase := `{{- define "harbor.database.coreDatabase" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.database -}}
+    {{- .Values.postgresql.auth.database -}}
   {{- else -}}
     {{- .Values.database.external.coreDatabase -}}
   {{- end -}}
@@ -383,7 +383,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 }
 
 func removeRelizaPostgresqlTemplate(cfg *Config) error {
-	fmt.Println("  → Removing redundant harbor.relizapostgresql template...")
+	fmt.Println("  → Removing redundant harbor.postgresql template...")
 
 	targetFile := filepath.Join(cfg.ChartDir, "templates", "_helpers.tpl")
 
@@ -392,20 +392,20 @@ func removeRelizaPostgresqlTemplate(cfg *Config) error {
 		return fmt.Errorf("failed to read _helpers.tpl: %w", err)
 	}
 
-	// Remove the harbor.relizapostgresql template definition (added by applyHelpers)
+	// Remove the harbor.postgresql template definition (added by applyHelpers)
 	templateToRemove := `{{/*
 Reliza PostgreSQL service name
-Returns the service name for relizapostgresql when enabled
+Returns the service name for postgresql when enabled
 */}}
-{{- define "harbor.relizapostgresql" -}}
-  {{- printf "%s-relizapostgresql" (include "harbor.fullname" .) -}}
+{{- define "harbor.postgresql" -}}
+  {{- printf "%s-postgresql" (include "harbor.fullname" .) -}}
 {{- end -}}
 `
 
 	newContent := strings.Replace(string(content), templateToRemove, "", 1)
 
 	if newContent == string(content) {
-		fmt.Println("    ⏭️  harbor.relizapostgresql template not found (already removed or not added)")
+		fmt.Println("    ⏭️  harbor.postgresql template not found (already removed or not added)")
 		return nil
 	}
 
@@ -602,7 +602,7 @@ func mergeValues(cfg *Config) error {
 	}
 
 	// Check if already modified
-	if _, ok := existingValues["relizaPostgresql"]; ok {
+	if _, ok := existingValues["postgresql"]; ok {
 		fmt.Println("    ⏭️  Values already merged, skipping...")
 		return nil
 	}

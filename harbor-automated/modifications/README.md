@@ -60,7 +60,7 @@ git add modifications/ && git commit -m "feat: add config" && git push
 - `trivy/trivy-sts.yaml` - Trivy scanner
 
 Note: Harbor's internal database templates (database-ss.yaml, database-svc.yaml, database-secret.yaml) 
-are NOT included - they've been completely removed in favor of relizapostgresql subchart.
+are NOT included - they've been completely removed in favor of postgresql subchart.
 
 **helpers/** - Template helpers
 - `chart.tpl` - Chart label

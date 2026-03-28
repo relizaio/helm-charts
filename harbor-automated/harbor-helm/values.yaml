@@ -491,7 +491,7 @@ registry:
         dryrun: false
         enabled: true
         interval: 24h
-relizapostgresql:
+postgresql:
     auth:
         database: registry
         existingSecret: ""

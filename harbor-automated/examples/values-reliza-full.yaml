@@ -32,7 +32,7 @@ harborAdminPassword: "Harbor12345"  # Change this!
 # ==========================================
 # Database - Reliza PostgreSQL
 # ==========================================
-relizaPostgresql:
+postgresql:
   enabled: true
   auth:
     username: harbor
@@ -57,7 +57,7 @@ relizaPostgresql:
 database:
   type: internal
   # Connection details (host, username, password, database) are automatically
-  # configured from relizapostgresql.auth.* values above
+  # configured from postgresql.auth.* values above
 
 # ==========================================
 # Storage - S3 (Optional)

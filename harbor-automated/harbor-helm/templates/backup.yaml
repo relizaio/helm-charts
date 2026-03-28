@@ -48,7 +48,7 @@ spec:
                 {{- if .Values.backup.postgresql.host }}
                 value: {{ .Values.backup.postgresql.host | quote }}
                 {{- else }}
-                value: {{ include "harbor.fullname" . }}-relizapostgresql
+                value: {{ include "harbor.fullname" . }}-postgresql
                 {{- end }}
               - name: PG_DATABASE
                 value: {{ .Values.backup.postgresql.database | quote }}

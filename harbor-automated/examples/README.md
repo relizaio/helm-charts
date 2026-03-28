@@ -4,12 +4,12 @@ This directory contains example configurations for deploying Harbor with Reliza 
 
 ### How It Works
 
-1. **Configure credentials once** in `relizapostgresql.auth.*`
+1. **Configure credentials once** in `postgresql.auth.*`
 2. **Harbor templates automatically use** these values for:
-   - Database host: `{release-name}-relizapostgresql`
-   - Database username: `relizapostgresql.auth.username`
-   - Database password: `relizapostgresql.auth.password`
-   - Database name: `relizapostgresql.auth.database`
+   - Database host: `{release-name}-postgresql`
+   - Database username: `postgresql.auth.username`
+   - Database password: `postgresql.auth.password`
+   - Database name: `postgresql.auth.database`
 
 ### External Database
 
@@ -131,7 +131,7 @@ helm install harbor ./harbor-helm \
 ### Change Database Credentials
 
 ```yaml
-relizapostgresql:
+postgresql:
   auth:
     username: myuser
     password: "MySecurePassword123!"
@@ -141,7 +141,7 @@ relizapostgresql:
 ### Increase Database Storage
 
 ```yaml
-relizapostgresql:
+postgresql:
   primary:
     persistence:
       size: 100Gi
@@ -150,7 +150,7 @@ relizapostgresql:
 ### Configure Database Resources
 
 ```yaml
-relizapostgresql:
+postgresql:
   primary:
     resources:
       requests:
@@ -164,7 +164,7 @@ relizapostgresql:
 ### Enable Database Metrics
 
 ```yaml
-relizapostgresql:
+postgresql:
   metrics:
     enabled: true
     serviceMonitor:
@@ -205,7 +205,7 @@ database:
 
 ### After (New)
 ```yaml
-relizapostgresql:
+postgresql:
   enabled: true
   auth:
     username: harbor
@@ -222,14 +222,14 @@ database:
 
 ```bash
 # Get PostgreSQL pod
-kubectl get pods -n harbor | grep relizapostgresql
+kubectl get pods -n harbor | grep postgresql
 
 # Check logs
-kubectl logs -n harbor <release>-relizapostgresql-0
+kubectl logs -n harbor <release>-postgresql-0
 
 # Test connection from Harbor core
 kubectl exec -n harbor <release>-harbor-core-xxx -- \
-  psql -h <release>-relizapostgresql -U harbor -d registry -c "SELECT 1"
+  psql -h <release>-postgresql -U harbor -d registry -c "SELECT 1"
 ```
 
 ### Verify Configuration
@@ -242,8 +242,8 @@ kubectl get cm -n harbor <release>-harbor-core -o yaml | grep POSTGRESQL
 ### Common Issues
 
 1. **Connection refused**: Check if PostgreSQL pod is running
-2. **Authentication failed**: Verify `relizapostgresql.auth.password` matches
-3. **Database not found**: Verify `relizapostgresql.auth.database` is correct
+2. **Authentication failed**: Verify `postgresql.auth.password` matches
+3. **Database not found**: Verify `postgresql.auth.database` is correct
 
 ## Additional Resources
 

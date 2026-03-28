@@ -24,7 +24,7 @@ externalURL: http://harbor.local
 harborAdminPassword: "Harbor12345"
 
 # Use Reliza PostgreSQL
-relizapostgresql:
+postgresql:
   enabled: true
   auth:
     username: harbor
@@ -44,7 +44,7 @@ relizapostgresql:
 
 database:
   type: internal
-  # Database connection details are automatically configured from relizapostgresql.auth.*
+  # Database connection details are automatically configured from postgresql.auth.*
   # No manual configuration needed!
 
 # Minimal storage

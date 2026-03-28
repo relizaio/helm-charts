@@ -69,7 +69,7 @@ echo "✅ Template renders successfully"
 echo ""
 echo "Verifying Reliza modifications..."
 grep -q "Reliza customization" harbor-helm/templates/_helpers.tpl && echo "✅ _helpers.tpl modified"
-grep -q "relizapostgresql" harbor-helm/values.yaml && echo "✅ values.yaml modified"
+grep -q "postgresql" harbor-helm/values.yaml && echo "✅ values.yaml modified"
 
 echo ""
 echo "=============================================="

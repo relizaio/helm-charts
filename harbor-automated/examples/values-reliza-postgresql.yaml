@@ -2,7 +2,7 @@
 # This configuration uses Reliza PostgreSQL for the database
 
 # Reliza PostgreSQL Configuration
-relizapostgresql:
+postgresql:
   enabled: true
   auth:
     username: harbor
@@ -27,7 +27,7 @@ relizapostgresql:
 database:
   type: internal
   # Connection details (host, username, password, database) are automatically
-  # configured from relizapostgresql.auth.* values above
+  # configured from postgresql.auth.* values above
 
 # External URL
 externalURL: http://harbor.local

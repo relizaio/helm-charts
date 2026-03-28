@@ -103,7 +103,7 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.username" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.username -}}
+    {{- .Values.postgresql.auth.username -}}
   {{- else -}}
     {{- .Values.database.external.username -}}
   {{- end -}}
@@ -111,8 +111,8 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.rawPassword" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- if not .Values.relizapostgresql.auth.existingSecret -}}
-      {{- .Values.relizapostgresql.auth.password -}}
+    {{- if not .Values.postgresql.auth.existingSecret -}}
+      {{- .Values.postgresql.auth.password -}}
     {{- end -}}
   {{- else -}}
     {{- .Values.database.external.password -}}
@@ -121,7 +121,7 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.existingSecretName" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.existingSecret -}}
+    {{- .Values.postgresql.auth.existingSecret -}}
   {{- else -}}
     {{- .Values.database.external.existingSecret -}}
   {{- end -}}
@@ -129,11 +129,11 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.existingSecretPasswordKey" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- $user := .Values.relizapostgresql.auth.username -}}
+    {{- $user := .Values.postgresql.auth.username -}}
     {{- if or (empty $user) (eq $user "postgres") -}}
-      {{- coalesce .Values.relizapostgresql.auth.secretKeys.adminPasswordKey "postgres-password" -}}
+      {{- coalesce .Values.postgresql.auth.secretKeys.adminPasswordKey "postgres-password" -}}
     {{- else -}}
-      {{- coalesce .Values.relizapostgresql.auth.secretKeys.userPasswordKey "password" -}}
+      {{- coalesce .Values.postgresql.auth.secretKeys.userPasswordKey "password" -}}
     {{- end -}}
   {{- else -}}
     {{- "password" -}}
@@ -150,7 +150,7 @@ app: "{{ template "harbor.name" . }}"
 
 {{- define "harbor.database.coreDatabase" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.database -}}
+    {{- .Values.postgresql.auth.database -}}
   {{- else -}}
     {{- .Values.database.external.coreDatabase -}}
   {{- end -}}

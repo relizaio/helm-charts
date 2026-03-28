@@ -26,7 +26,7 @@ backup:
     username: postgres
     # Database name to backup
     database: registry
-    # Host (leave empty to auto-detect from relizapostgresql)
+    # Host (leave empty to auto-detect from postgresql)
     host: ""
 
     # Option 1: Use existing secret for password
