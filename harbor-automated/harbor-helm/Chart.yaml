@@ -19,4 +19,4 @@ name: harbor-helm
 sources:
     - https://github.com/goharbor/harbor
     - https://github.com/goharbor/harbor-helm
-version: 0.0.4
+version: 0.0.5
