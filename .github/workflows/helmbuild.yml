@@ -140,19 +140,23 @@ jobs:
   build-harbor-automated:
     permissions:
       contents: write
+      id-token: write
     name: Build And Push Harbor Automated Helm Chart
     runs-on: ubuntu-latest
     steps:
-      - name: RelizaHub Build And Submit Harbor Helm metadata action
-        uses: relizaio/reliza-helm-action@da0686fdfb9db1769693a64c5a0a68e5f54cbcab # v3.10
+      - name: Build And Submit Harbor Helm metadata action to ReARM
+        uses: relizaio/rearm-helm-action@a9984fe2e241a8e5838be5415f58936dc92c2421 # v1.7.0
         with:
           registry_username: ${{ secrets.RH_LIBRARY_HELM_LOGIN }}
           registry_password: ${{ secrets.RH_LIBRARY_HELM_PASS }}
           registry_host: registry.relizahub.com/library
           helm_chart_name: harbor-helm
-          reliza_api_id: ${{ secrets.RELIZA_HARBOR_HELM_API_ID }}
-          reliza_api_key: ${{ secrets.RELIZA_HARBOR_HELM_API_KEY }}
-          path: harbor-automated
+          rearm_api_id: ${{ secrets.RELIZA_HARBOR_HELM_API_ID }}
+          rearm_api_key: ${{ secrets.RELIZA_HARBOR_HELM_API_KEY }}
+          rearm_api_url: https://reliza.rearmhq.com
+          path: harbor-automated/harbor-helm
+          enable_sbom: true
+          enable_public_cosign_sigstore: true
   build-wordpress:
     permissions:
       contents: write
