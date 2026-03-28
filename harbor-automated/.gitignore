@@ -4,6 +4,8 @@ bin/
 # Packaged charts (CI generates these)
 packages/
 *.tgz
+# But keep harbor-helm subchart dependencies committed (CI doesn't run helm dep update)
+!harbor-helm/charts/*.tgz
 
 # Temporary files
 *.tmp
