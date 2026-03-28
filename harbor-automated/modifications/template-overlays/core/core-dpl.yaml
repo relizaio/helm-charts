@@ -127,12 +127,12 @@ spec:
           - name: INTERNAL_TLS_TRUST_CA_PATH
             value: /etc/harbor/ssl/core/ca.crt
           {{- end }}
-          {{- if .Values.database.external.existingSecret }}
+          {{- if (include "harbor.database.existingSecretName" .) }}
           - name: POSTGRESQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.database.external.existingSecret }}
-                key: password
+                name: {{ include "harbor.database.existingSecretName" . }}
+                key: {{ include "harbor.database.existingSecretPasswordKey" . }}
           {{- end }}
           {{- if .Values.registry.credentials.existingSecret }}
           - name: REGISTRY_CREDENTIAL_PASSWORD

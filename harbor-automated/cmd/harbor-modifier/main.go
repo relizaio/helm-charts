@@ -308,6 +308,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 	newContent = strings.Replace(newContent, oldUsername, newUsername, 1)
 
 	// 3. Update harbor.database.rawPassword to use relizapostgresql.auth.password (remove secret lookup)
+	// Also respects existingSecret - returns empty when secret is external
 	oldPassword := `{{- define "harbor.database.rawPassword" -}}
   {{- if eq .Values.database.type "internal" -}}
     {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace (include "harbor.database" .) -}}
@@ -323,9 +324,27 @@ func patchDatabaseTemplates(cfg *Config) error {
 
 	newPassword := `{{- define "harbor.database.rawPassword" -}}
   {{- if eq .Values.database.type "internal" -}}
-    {{- .Values.relizapostgresql.auth.password -}}
+    {{- if not .Values.relizapostgresql.auth.existingSecret -}}
+      {{- .Values.relizapostgresql.auth.password -}}
+    {{- end -}}
   {{- else -}}
     {{- .Values.database.external.password -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "harbor.database.existingSecretName" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- .Values.relizapostgresql.auth.existingSecret -}}
+  {{- else -}}
+    {{- .Values.database.external.existingSecret -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "harbor.database.existingSecretPasswordKey" -}}
+  {{- if eq .Values.database.type "internal" -}}
+    {{- .Values.relizapostgresql.auth.secretKeys.userPasswordKey | default "password" -}}
+  {{- else -}}
+    {{- "password" -}}
   {{- end -}}
 {{- end -}}`
 
@@ -354,7 +373,7 @@ func patchDatabaseTemplates(cfg *Config) error {
 		return fmt.Errorf("failed to write patched _helpers.tpl: %w", err)
 	}
 
-	fmt.Println("    ✅ Database templates patched (4 templates updated)")
+	fmt.Println("    ✅ Database templates patched (6 templates updated)")
 	return nil
 }
 
